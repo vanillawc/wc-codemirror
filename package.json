@@ -19,5 +19,7 @@
     "dev": "npx live-server --open=dev"
   },
   "dependencies": {},
-  "devDependencies": {}
+  "devDependencies": {
+    "codemirror": "^5.49.2"
+  }
 }
