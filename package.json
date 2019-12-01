@@ -1,0 +1,23 @@
+{
+  "name": "@vanillawc/wc-codemirror",
+  "version": "0.0.0",
+  "license": "MIT",
+  "author": "Evan Plaice <evanplaice@gmail.com> (http://evanplaice.com/)",
+  "description": "CodeMirror as a vanilla web component",
+  "keywords": [
+    "web-components",
+    "vanilla",
+    "editor",
+    "codemirror"
+  ],
+  "repository": "https://github.com/vanillawc/wc-codemirror/",
+  "main": "src/wc-codemirror.js",
+  "module": "dist/wc-codemirror.js",
+  "type": "module",
+  "scripts": {
+    "start": "npx live-server --open=demo",
+    "dev": "npx live-server --open=dev"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
