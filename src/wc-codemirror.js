@@ -390,10 +390,6 @@ export class WCCodeMirror extends HTMLElement {
 
   async connectedCallback () {
     this.initialize();
-
-    if (this.hasAttribute('src')) {
-      this.fetchSrc();
-    }
   }
 
   initialize () {
