@@ -1,5 +1,3 @@
-# WC-CodeMirror
-
 [![GitHub release](https://img.shields.io/github/v/release/vanillawc/wc-codemirror.svg)](https://github.com/vanillawc/wc-codemirror/releases)
 [![npm](https://badgen.net/npm/v/@vanillawc/wc-codemirror)](https://www.npmjs.com/package/@vanillawc/wc-codemirror)
 [![downloads](https://badgen.net/npm/dt/@vanillawc/wc-codemirror)](https://www.npmjs.com/package/@vanillawc/wc-codemirror)
