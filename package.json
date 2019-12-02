@@ -34,7 +34,7 @@
       "demo/*",
       "dev/*",
       "dist/*",
-      "vendor/*"
+      "mode/*"
     ]
   }
 }
