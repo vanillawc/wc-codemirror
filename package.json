@@ -19,7 +19,10 @@
     "dev": "npx live-server --open=dev",
     "lint": "semistandard",
     "build:src": "npx rollup --config rollup.config.js ",
-    "build:assets": "cp -r ./node_modules/codemirror/theme/* ./dist/theme/ && cp -r ./node_modules/codemirror/mode/* ./dist/mode/  && cp -r ./node_modules/codemirror/lib/codemirror.css ./vendor/codemirror"
+    "build:assets": "cp -r ./node_modules/codemirror/theme/* ./dist/theme/ && cp -r ./node_modules/codemirror/mode/* ./dist/mode/  && cp -r ./node_modules/codemirror/lib/codemirror.css ./vendor/codemirror",
+    "package": "npx rimraf package && npm pack | tail -n 1 | xargs tar -xf",
+    "preversion": "npm run lint",
+    "postversion": "git push --follow-tags"
   },
   "dependencies": {},
   "devDependencies": {
