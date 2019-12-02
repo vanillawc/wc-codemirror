@@ -358,7 +358,6 @@ span.CodeMirror-selectedtext { background: none; }
 <textarea id="code" name="code"></textarea>
 `;
 
-
 export class WCCodeMirror extends HTMLElement {
   constructor () {
     super();
@@ -393,7 +392,7 @@ export class WCCodeMirror extends HTMLElement {
     this.initialize();
 
     if (this.hasAttribute('src')) {
-      this.fetchSrc();  
+      this.fetchSrc();
     }
   }
 
@@ -407,10 +406,9 @@ export class WCCodeMirror extends HTMLElement {
     // create the editor
     this.__editor = CodeMirror.fromTextArea(this.__element, {
       lineNumbers: true,
-      readOnly: false,  
-      mode: this.getAttribute('mode'),
+      readOnly: false,
+      mode: this.getAttribute('mode')
     });
-
   }
 
   async fetchSrc () {
