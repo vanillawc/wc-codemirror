@@ -1,1 +1,1 @@
-<wc-codemirror mode="javascript" src="./assets/sample.js"></wc-codemirror>
+<wc-codemirror src="./assets/sample.js" mode="javascript"></wc-codemirror>
