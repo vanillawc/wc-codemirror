@@ -385,7 +385,7 @@ export class WCCodeMirror extends HTMLElement {
 
   get value () { return this.__editor.getValue(); }
   set value (value) {
-    this.__editor.swapDoc(CodeMirror.Doc(value));
+    this.__editor.swapDoc(CodeMirror.Doc(value), this.getAttribute('mode'));
   }
 
   async connectedCallback () {
@@ -415,7 +415,7 @@ export class WCCodeMirror extends HTMLElement {
     // fetch the external markdown source
     const response = await fetch(this.src);
     const contents = await response.text();
-    this.__editor.swapDoc(CodeMirror.Doc(contents));
+    this.__editor.swapDoc(CodeMirror.Doc(contents, this.getAttribute('mode')));
   }
 }
 
