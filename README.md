@@ -57,4 +57,3 @@ npm run start
 ```
 
 [WC-CodeMirror - Demo]: https://vanillawc.github.io/wc-codemirror/demo/index.html
-
