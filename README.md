@@ -5,7 +5,7 @@
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/vanillawc/wc-codemirror/master/LICENSE)
 [![Actions Status](https://github.com/vanillawc/wc-codemirror/workflows/Release/badge.svg)](https://github.com/vanillawc/wc-codemirror/actions)
 
-A Vanilla Web Component to embed a Monaco code editor into a web page
+A Vanilla Web Component to embed a CodeMirror editor into a web page
 
  <!-- TODO: Add video graphic here -->
 
