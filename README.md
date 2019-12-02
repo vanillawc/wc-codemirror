@@ -38,13 +38,22 @@ Then import the `index.js` file at the root of the package.
 
 - `value` - get/set the editor's contents
 
-### Load the source from an external source
+### Basic Usage
 
 ```html
 <wc-codemirror src="./assets/sample.js"></wc-codemirror>
 ```
 
-***Demo: [WC-CodeMirror - Demo][]***
+***Demo: [WC-CodeMirror - Basic Usage][]***
+
+### Syntax Highlighting
+
+```html
+<wc-codemirror mode="javascript" src="./assets/sample.js"></wc-codemirror>
+```
+
+***Demo: [WC-CodeMirror - 'mode' Attribute][]***
+
 
 ## Demos
 
@@ -54,4 +63,5 @@ The demo can also be run locally with
 npm run start
 ```
 
-[WC-CodeMirror - Demo]: https://vanillawc.github.io/wc-codemirror/demo/index.html
+[WC-CodeMirror - Basic Usage]: https://vanillawc.github.io/wc-codemirror/demo/basic-usage.html
+[WC-CodeMirror - 'mode' Attribute]: https://vanillawc.github.io/wc-codemirror/demo/mode-attribute.html
