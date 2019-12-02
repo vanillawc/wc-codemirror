@@ -10042,7 +10042,6 @@ span.CodeMirror-selectedtext { background: none; }
 <textarea id="code" name="code"></textarea>
 `;
 
-
 class WCCodeMirror extends HTMLElement {
   constructor () {
     super();
@@ -10070,15 +10069,11 @@ class WCCodeMirror extends HTMLElement {
 
   get value () { return this.__editor.getValue(); }
   set value (value) {
-    this.__editor.swapDoc(CodeMirror.Doc(value));
+    this.__editor.swapDoc(CodeMirror.Doc(value), this.getAttribute('mode'));
   }
 
   async connectedCallback () {
     this.initialize();
-
-    if (this.hasAttribute('src')) {
-      this.fetchSrc();  
-    }
   }
 
   initialize () {
@@ -10091,17 +10086,16 @@ class WCCodeMirror extends HTMLElement {
     // create the editor
     this.__editor = CodeMirror.fromTextArea(this.__element, {
       lineNumbers: true,
-      readOnly: false,  
-      mode: this.getAttribute('mode'),
+      readOnly: false,
+      mode: this.getAttribute('mode')
     });
-
   }
 
   async fetchSrc () {
     // fetch the external markdown source
     const response = await fetch(this.src);
     const contents = await response.text();
-    this.__editor.swapDoc(CodeMirror.Doc(contents));
+    this.__editor.swapDoc(CodeMirror.Doc(contents, this.getAttribute('mode')));
   }
 }
 
