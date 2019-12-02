@@ -17,7 +17,8 @@
   "scripts": {
     "start": "npx live-server --open=demo",
     "dev": "npx live-server --open=dev",
-    "build:assets": "cp -r ./node_modules/codemirror/theme/* ./dist/theme/ && cp -r ./node_modules/codemirror/mode/* ./dist/mode/  && cp -r ./node_modules/codemirror/lib/codemirror.css ./vendor/codemirror",
+    "build:src": "npx rollup --config rollup.config.js ",
+    "build:assets": "cp -r ./node_modules/codemirror/theme/* ./dist/theme/ && cp -r ./node_modules/codemirror/mode/* ./dist/mode/  && cp -r ./node_modules/codemirror/lib/codemirror.css ./vendor/codemirror"
   },
   "dependencies": {},
   "devDependencies": {
