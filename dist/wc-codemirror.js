@@ -10087,7 +10087,8 @@ class WCCodeMirror extends HTMLElement {
     this.__editor = CodeMirror.fromTextArea(this.__element, {
       lineNumbers: true,
       readOnly: false,
-      mode: this.getAttribute('mode')
+      mode: this.getAttribute('mode'),
+      theme: this.getAttribute('theme')
     });
   }
 
