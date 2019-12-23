@@ -9701,7 +9701,6 @@ class WCCodeMirror extends HTMLElement {
   get src () { return this.getAttribute('src'); }
   set src (value) {
     this.setAttribute('src', value);
-    console.log('wat');
     this.setSrc();
     this.__editor.refresh();
   }
