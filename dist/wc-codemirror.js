@@ -9728,13 +9728,12 @@ class WCCodeMirror extends HTMLElement {
     const src = this.getAttribute('src');
     this.__element.value = await this.fetchSrc(src);
 
-    const mode = this.getAttribute('mode') || 'javascript';
     const theme = this.getAttribute('theme') || 'default';
 
     this.__editor = CodeMirror.fromTextArea(this.__element, {
       lineNumbers: true,
       readOnly: false,
-      mode,
+      mode: this.getAttribute('mode'),
       theme
     });
 
