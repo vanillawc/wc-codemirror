@@ -9692,6 +9692,7 @@ class WCCodeMirror extends HTMLElement {
   }
 
   attributeChangedCallback (name, oldValue, newValue) {
+    if (!this.__initialized) { return; }
     if (oldValue !== newValue) {
       this[name] = newValue;
     }
@@ -9700,7 +9701,8 @@ class WCCodeMirror extends HTMLElement {
   get src () { return this.getAttribute('src'); }
   set src (value) {
     this.setAttribute('src', value);
-    this.fetchSrc();
+    console.log('wat');
+    this.setSrc();
     this.__editor.refresh();
   }
 
@@ -9714,18 +9716,18 @@ class WCCodeMirror extends HTMLElement {
     const template = document.createElement('template');
     template.innerHTML = WCCodeMirror.template();
     this.appendChild(template.content.cloneNode(true));
+    this.__initialized = false;
     this.__element = null;
     this.__editor = null;
   }
 
   async connectedCallback () {
-    this.initialize();
-  }
-
-  initialize () {
     this.__element = this.querySelector('#code');
     this.__element.style = this.hasAttribute('style') ? this.style.cssText : 'width:100%;height:100%';
     this.appendChild(this.__element);
+
+    const src = this.getAttribute('src');
+    this.__element.value = await this.fetchSrc(src);
 
     this.__editor = CodeMirror.fromTextArea(this.__element, {
       lineNumbers: true,
@@ -9733,12 +9735,19 @@ class WCCodeMirror extends HTMLElement {
       mode: this.getAttribute('mode'),
       theme: this.getAttribute('theme')
     });
+
+    this.__initialized = true;
   }
 
-  async fetchSrc () {
-    const response = await fetch(this.src);
-    const contents = await response.text();
+  async setSrc () {
+    const src = this.getAttribute('src');
+    const contents = await this.fetchSrc(src);
     this.__editor.swapDoc(CodeMirror.Doc(contents, this.getAttribute('mode')));
+  }
+
+  async fetchSrc (src) {
+    const response = await fetch(src);
+    return response.text();
   }
 
   static template () {

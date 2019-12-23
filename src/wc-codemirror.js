@@ -29,10 +29,10 @@ export class WCCodeMirror extends HTMLElement {
 
   constructor () {
     super();
-    this.__initialized = false;
     const template = document.createElement('template');
     template.innerHTML = WCCodeMirror.template();
     this.appendChild(template.content.cloneNode(true));
+    this.__initialized = false;
     this.__element = null;
     this.__editor = null;
   }
