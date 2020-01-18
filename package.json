@@ -15,7 +15,7 @@
   "module": "dist/wc-codemirror.js",
   "type": "module",
   "scripts": {
-    "start": "npx live-server --no-browser --open=dev",
+    "start": "npx live-server --no-browser --port=5500 --open=dev",
     "lint": "semistandard",
     "build": "npx rollup --config .config/rollup.config.js ",
     "build:assets": "cp -r ./node_modules/codemirror/theme/* ./theme/ && cp -r ./node_modules/codemirror/mode/* ./mode/",
