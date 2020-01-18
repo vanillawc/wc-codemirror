@@ -17,7 +17,6 @@ export class WCCodeMirror extends HTMLElement {
   get src () { return this.getAttribute('src'); }
   set src (value) {
     this.setAttribute('src', value);
-    console.log('wat');
     this.setSrc();
     this.__editor.refresh();
   }
@@ -45,7 +44,7 @@ export class WCCodeMirror extends HTMLElement {
     const src = this.getAttribute('src');
     this.__element.value = await this.fetchSrc(src);
 
-    const mode = this.getAttribute('mode') || 'javascript';
+    const mode = this.getAttribute('mode') || 'null';
     const theme = this.getAttribute('theme') || 'default';
 
     this.__editor = CodeMirror.fromTextArea(this.__element, {
