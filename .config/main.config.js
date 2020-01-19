@@ -1,7 +1,7 @@
 export default {
   input: 'src/wc-codemirror.js',
   output: {
-    file: 'dist/wc-codemirror.js',
+    file: 'index.js',
     format: 'esm'
   }
 };
