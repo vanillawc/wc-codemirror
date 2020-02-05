@@ -12,7 +12,6 @@
   ],
   "repository": "https://github.com/vanillawc/wc-codemirror/",
   "main": "src/wc-codemirror.js",
-  "module": "dist/wc-codemirror.js",
   "type": "module",
   "scripts": {
     "start": "npx live-server --no-browser --port=5500 --open=dev",
