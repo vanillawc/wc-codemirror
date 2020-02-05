@@ -1,14 +1,12 @@
-[![GitHub Releases](https://img.shields.io/github/v/release/vanillawc/wc-codemirror.svg)](https://github.com/vanillawc/wc-codemirror/releases)
+[![GitHub Releases](https://badgen.net/github/tag/vanillawc/wc-codemirror)](https://github.com/vanillawc/wc-codemirror/releases)
 [![NPM Release](https://badgen.net/npm/v/@vanillawc/wc-codemirror)](https://www.npmjs.com/package/@vanillawc/wc-codemirror)
-[![Downloads](https://badgen.net/npm/dt/@vanillawc/wc-codemirror)](https://www.npmjs.com/package/@vanillawc/wc-codemirror)
-[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/vanillawc/wc-codemirror/master/LICENSE)
+[![Bundlephobia](https://badgen.net/bundlephobia/minzip/@vanillawc/wc-codemirror)](https://bundlephobia.com/result?p=@vanillawc/wc-codemirror)
+[![MIT License](https://badgen.net/github/license/vanillawc/wc-codemirror)](https://raw.githubusercontent.com/vanillawc/wc-codemirror/master/LICENSE)
 [![Published on WebComponents.org](https://img.shields.io/badge/webcomponents.org-published-blue.svg)](https://www.webcomponents.org/element/@vanillawc/wc-codemirror)
 [![Latest Status](https://github.com/vanillawc/wc-codemirror/workflows/Latest/badge.svg)](https://github.com/vanillawc/wc-codemirror/actions)
 [![Release Status](https://github.com/vanillawc/wc-codemirror/workflows/Release/badge.svg)](https://github.com/vanillawc/wc-codemirror/actions)
 
 A Vanilla Web Component to embed a CodeMirror editor into a web page
-
- <!-- TODO: Add video graphic here -->
 
 -----
 
