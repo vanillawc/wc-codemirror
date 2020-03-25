@@ -472,14 +472,15 @@ let bidiOrdering = (function() {
         for (++i; i < len && countsAsLeft.test(types[i]); ++i) {}
         order.push(new BidiSpan(0, start, i));
       } else {
-        let pos = i, at = order.length;
+        let pos = i, at = order.length, isRTL = direction == "rtl" ? 1 : 0;
         for (++i; i < len && types[i] != "L"; ++i) {}
         for (let j = pos; j < i;) {
           if (countsAsNum.test(types[j])) {
-            if (pos < j) order.splice(at, 0, new BidiSpan(1, pos, j));
+            if (pos < j) { order.splice(at, 0, new BidiSpan(1, pos, j)); at += isRTL; }
             let nstart = j;
             for (++j; j < i && countsAsNum.test(types[j]); ++j) {}
             order.splice(at, 0, new BidiSpan(2, nstart, j));
+            at += isRTL;
             pos = j;
           } else ++j;
         }
@@ -2194,10 +2195,10 @@ function updateLineGutter(cm, lineView, lineN, dims) {
 
 function updateLineWidgets(cm, lineView, dims) {
   if (lineView.alignable) lineView.alignable = null;
+  let isWidget = classTest("CodeMirror-linewidget");
   for (let node = lineView.node.firstChild, next; node; node = next) {
     next = node.nextSibling;
-    if (node.className == "CodeMirror-linewidget")
-      lineView.node.removeChild(node);
+    if (isWidget.test(node.className)) lineView.node.removeChild(node);
   }
   insertLineWidgets(cm, lineView, dims);
 }
@@ -2227,7 +2228,7 @@ function insertLineWidgetsFor(cm, line, lineView, dims, allowAbove) {
   if (!line.widgets) return
   let wrap = ensureLineWrapped(lineView);
   for (let i = 0, ws = line.widgets; i < ws.length; ++i) {
-    let widget = ws[i], node = elt("div", [widget.node], "CodeMirror-linewidget");
+    let widget = ws[i], node = elt("div", [widget.node], "CodeMirror-linewidget" + (widget.className ? " " + widget.className : ""));
     if (!widget.handleMouseEvents) node.setAttribute("cm-ignore-events", "true");
     positionLineWidget(widget, node, lineView, dims);
     cm.display.input.setUneditable(node);
@@ -2948,7 +2949,7 @@ function posFromMouse(cm, e, liberal, forRect) {
   try { x = e.clientX - space.left; y = e.clientY - space.top; }
   catch (e) { return null }
   let coords = coordsChar(cm, x, y), line;
-  if (forRect && coords.xRel == 1 && (line = getLine(cm.doc, coords.line).text).length == coords.ch) {
+  if (forRect && coords.xRel > 0 && (line = getLine(cm.doc, coords.line).text).length == coords.ch) {
     let colDiff = countColumn(line, line.length, cm.options.tabSize) - line.length;
     coords = Pos(coords.line, Math.max(0, Math.round((x - paddingH(cm.display).left) / charWidth(cm.display)) - colDiff));
   }
@@ -3540,7 +3541,7 @@ function updateScrollTop(cm, val) {
 }
 
 function setScrollTop(cm, val, forceScroll) {
-  val = Math.min(cm.display.scroller.scrollHeight - cm.display.scroller.clientHeight, val);
+  val = Math.max(0, Math.min(cm.display.scroller.scrollHeight - cm.display.scroller.clientHeight, val));
   if (cm.display.scroller.scrollTop == val && !forceScroll) return
   cm.doc.scrollTop = val;
   cm.display.scrollbars.setScrollTop(val);
@@ -3550,7 +3551,7 @@ function setScrollTop(cm, val, forceScroll) {
 // Sync scroller and scrollbar, ensure the gutter elements are
 // aligned.
 function setScrollLeft(cm, val, isScroller, forceScroll) {
-  val = Math.min(val, cm.display.scroller.scrollWidth - cm.display.scroller.clientWidth);
+  val = Math.max(0, Math.min(val, cm.display.scroller.scrollWidth - cm.display.scroller.clientWidth));
   if ((isScroller ? val == cm.doc.scrollLeft : Math.abs(cm.doc.scrollLeft - val) < 2) && !forceScroll) return
   cm.doc.scrollLeft = val;
   alignHorizontally(cm);
@@ -4141,6 +4142,8 @@ function postUpdateDisplay(cm, update) {
       update.visible = visibleLines(cm.display, cm.doc, viewport);
       if (update.visible.from >= cm.display.viewFrom && update.visible.to <= cm.display.viewTo)
         break
+    } else if (first) {
+      update.visible = visibleLines(cm.display, cm.doc, viewport);
     }
     if (!updateDisplayIfNeeded(cm, update)) break
     updateHeightsInViewport(cm);
@@ -6219,7 +6222,10 @@ Doc.prototype = createObj(BranchChunk.prototype, {
     for (let i = 0; i < hist.undone.length; i++) if (!hist.undone[i].ranges) ++undone;
     return {undo: done, redo: undone}
   },
-  clearHistory: function() {this.history = new History(this.history.maxGeneration);},
+  clearHistory: function() {
+    this.history = new History(this.history.maxGeneration);
+    linkedDocs(this, doc => doc.history = this.history, true);
+  },
 
   markClean: function() {
     this.cleanGeneration = this.changeGeneration(true);
@@ -6468,28 +6474,39 @@ function onDrop(e) {
   // and insert it.
   if (files && files.length && window.FileReader && window.File) {
     let n = files.length, text = Array(n), read = 0;
-    let loadFile = (file, i) => {
-      if (cm.options.allowDropFileTypes &&
-          indexOf(cm.options.allowDropFileTypes, file.type) == -1)
-        return
-
-      let reader = new FileReader;
-      reader.onload = operation(cm, () => {
-        let content = reader.result;
-        if (/[\x00-\x08\x0e-\x1f]{2}/.test(content)) content = "";
-        text[i] = content;
-        if (++read == n) {
+    const markAsReadAndPasteIfAllFilesAreRead = () => {
+      if (++read == n) {
+        operation(cm, () => {
           pos = clipPos(cm.doc, pos);
           let change = {from: pos, to: pos,
-                        text: cm.doc.splitLines(text.join(cm.doc.lineSeparator())),
+                        text: cm.doc.splitLines(
+                            text.filter(t => t != null).join(cm.doc.lineSeparator())),
                         origin: "paste"};
           makeChange(cm.doc, change);
-          setSelectionReplaceHistory(cm.doc, simpleSelection(pos, changeEnd(change)));
+          setSelectionReplaceHistory(cm.doc, simpleSelection(clipPos(cm.doc, pos), clipPos(cm.doc, changeEnd(change))));
+        })();
+      }
+    };
+    const readTextFromFile = (file, i) => {
+      if (cm.options.allowDropFileTypes &&
+          indexOf(cm.options.allowDropFileTypes, file.type) == -1) {
+        markAsReadAndPasteIfAllFilesAreRead();
+        return
+      }
+      let reader = new FileReader;
+      reader.onerror = () => markAsReadAndPasteIfAllFilesAreRead();
+      reader.onload = () => {
+        let content = reader.result;
+        if (/[\x00-\x08\x0e-\x1f]{2}/.test(content)) {
+          markAsReadAndPasteIfAllFilesAreRead();
+          return
         }
-      });
+        text[i] = content;
+        markAsReadAndPasteIfAllFilesAreRead();
+      };
       reader.readAsText(file);
     };
-    for (let i = 0; i < n; ++i) loadFile(files[i], i);
+    for (let i = 0; i < files.length; i++) readTextFromFile(files[i], i);
   } else { // Normal drop
     // Don't do a replace if the drop happened inside of the selected text.
     if (cm.state.draggingText && cm.doc.sel.contains(pos) > -1) {
@@ -6799,6 +6816,7 @@ function moveLogically(line, start, dir) {
 
 function endOfLine(visually, cm, lineObj, lineNo, dir) {
   if (visually) {
+    if (cm.doc.direction == "rtl") dir = -dir;
     let order = getOrder(lineObj, cm.doc.direction);
     if (order) {
       let part = dir < 0 ? lst(order) : order[0];
@@ -7053,7 +7071,7 @@ function lineStartSmart(cm, pos) {
   let line = getLine(cm.doc, start.line);
   let order = getOrder(line, cm.doc.direction);
   if (!order || order[0].level == 0) {
-    let firstNonWS = Math.max(0, line.text.search(/\S/));
+    let firstNonWS = Math.max(start.ch, line.text.search(/\S/));
     let inWS = pos.line == start.line && pos.ch <= firstNonWS && pos.ch;
     return Pos(start.line, inWS ? 0 : firstNonWS, start.sticky)
   }
@@ -7169,6 +7187,8 @@ function onKeyDown(e) {
     if (!handled && code == 88 && !hasCopyEvent && (mac ? e.metaKey : e.ctrlKey))
       cm.replaceSelection("", null, "cut");
   }
+  if (gecko && !mac && !handled && code == 46 && e.shiftKey && !e.ctrlKey && document.execCommand)
+    document.execCommand("cut");
 
   // Turn mouse into crosshair when Alt is held on Mac.
   if (code == 18 && !/\bCodeMirror-crosshair\b/.test(cm.display.lineDiv.className))
@@ -7872,6 +7892,9 @@ function registerEventHandlers(cm) {
   // which point we can't mess with it anymore. Context menu is
   // handled in onMouseDown for these browsers.
   on(d.scroller, "contextmenu", e => onContextMenu(cm, e));
+  on(d.input.getField(), "contextmenu", e => {
+    if (!d.scroller.contains(e.target)) onContextMenu(cm, e);
+  });
 
   // Used to suppress mouse event handling when a touch happens
   let touchFinished, prevTouch = {end: 0};
@@ -8596,8 +8619,9 @@ function findPosH(doc, pos, dir, unit, visually) {
   let oldPos = pos;
   let origDir = dir;
   let lineObj = getLine(doc, pos.line);
+  let lineDir = visually && doc.direction == "rtl" ? -dir : dir;
   function findNextLine() {
-    let l = pos.line + dir;
+    let l = pos.line + lineDir;
     if (l < doc.first || l >= doc.first + doc.size) return false
     pos = new Pos(l, pos.ch, pos.sticky);
     return lineObj = getLine(doc, l)
@@ -8611,7 +8635,7 @@ function findPosH(doc, pos, dir, unit, visually) {
     }
     if (next == null) {
       if (!boundToLine && findNextLine())
-        pos = endOfLine(visually, doc.cm, lineObj, pos.line, dir);
+        pos = endOfLine(visually, doc.cm, lineObj, pos.line, lineDir);
       else
         return false
     } else {
@@ -8759,7 +8783,7 @@ class ContentEditableInput {
 
   prepareSelection() {
     let result = prepareSelection(this.cm, false);
-    result.focus = this.cm.state.focused;
+    result.focus = document.activeElement == this.div;
     return result
   }
 
@@ -8853,7 +8877,7 @@ class ContentEditableInput {
 
   focus() {
     if (this.cm.options.readOnly != "nocursor") {
-      if (!this.selectionInEditor())
+      if (!this.selectionInEditor() || document.activeElement != this.div)
         this.showSelection(this.prepareSelection(), true);
       this.div.focus();
     }
@@ -9681,7 +9705,7 @@ CodeMirror.fromTextArea = fromTextArea;
 
 addLegacyProps(CodeMirror);
 
-CodeMirror.version = "5.49.2";
+CodeMirror.version = "5.52.2";
 
 /* eslint no-undef: 0 */
 self.CodeMirror = CodeMirror;
