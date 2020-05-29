@@ -9712,7 +9712,7 @@ self.CodeMirror = CodeMirror;
 
 class WCCodeMirror extends HTMLElement {
   static get observedAttributes () {
-    return ['src', 'value'];
+    return ['src'];
   }
 
   attributeChangedCallback (name, oldValue, newValue) {
@@ -9726,12 +9726,11 @@ class WCCodeMirror extends HTMLElement {
   set src (value) {
     this.setAttribute('src', value);
     this.setSrc();
-    this.__editor.refresh();
   }
 
   get value () { return this.__editor.getValue(); }
   set value (value) {
-    this.__editor.swapDoc(CodeMirror.Doc(value), this.getAttribute('mode'));
+    this.setValue(value);
   }
 
   constructor () {
@@ -9747,17 +9746,9 @@ class WCCodeMirror extends HTMLElement {
   async connectedCallback () {
     this.__element = this.querySelector('#code');
     this.__element.style = this.hasAttribute('style') ? this.style.cssText : 'width:100%;height:100%';
-    this.appendChild(this.__element);
 
-    if (this.hasAttribute('src')) {
-      const src = this.getAttribute('src');
-      this.__element.value = await this.fetchSrc(src);
-    } else {
-      this.__element.value = '';
-    }
-
-    const mode = this.getAttribute('mode') || 'null';
-    const theme = this.getAttribute('theme') || 'default';
+    const mode = this.hasAttribute('mode') ? this.getAttribute('mode') : 'null';
+    const theme = this.hasAttribute('theme') ? this.getAttribute('theme') : 'default';
 
     this.__editor = CodeMirror.fromTextArea(this.__element, {
       lineNumbers: true,
@@ -9766,6 +9757,14 @@ class WCCodeMirror extends HTMLElement {
       theme
     });
 
+    if (this.hasAttribute('src')) {
+      this.setSrc(this.getAttribute('src'));
+    } else {
+      // delay until editor initializes
+      await new Promise(resolve => setTimeout(resolve, 50));
+      this.setValue('');
+    }
+
     this.__initialized = true;
   }
 
@@ -9773,6 +9772,12 @@ class WCCodeMirror extends HTMLElement {
     const src = this.getAttribute('src');
     const contents = await this.fetchSrc(src);
     this.__editor.swapDoc(CodeMirror.Doc(contents, this.getAttribute('mode')));
+    this.__editor.refresh();
+  }
+
+  async setValue (value) {
+    this.__editor.swapDoc(CodeMirror.Doc(value, this.getAttribute('mode')));
+    this.__editor.refresh();
   }
 
   async fetchSrc (src) {

@@ -71,7 +71,7 @@ Syntax highlighting requires importing a `mode` module for the language
 Then specify the language with the `mode` attribute
 
 ```html
-<wc-codemirror mode="javascript" src="sample.js"></wc-codemirror>
+<wc-codemirror mode="javascript"></wc-codemirror>
 ```
 
 ### Theming
@@ -85,5 +85,5 @@ Theming requires importing an editor theme stylesheet
 Then specify the theme with the `theme` attribute
 
 ```html
-<wc-codemirror mode="javascript" theme="monokai" src="sample.js"></wc-codemirror>
+<wc-codemirror mode="javascript" theme="monokai"></wc-codemirror>
 ```
