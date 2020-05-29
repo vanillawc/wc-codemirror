@@ -41,8 +41,12 @@ export class WCCodeMirror extends HTMLElement {
     this.__element.style = this.hasAttribute('style') ? this.style.cssText : 'width:100%;height:100%';
     this.appendChild(this.__element);
 
-    const src = this.getAttribute('src');
-    this.__element.value = await this.fetchSrc(src);
+    if (this.hasAttribute('src')) {
+      const src = this.getAttribute('src');
+      this.__element.value = await this.fetchSrc(src);
+    } else {
+      this.__element.value = '';
+    }
 
     const mode = this.getAttribute('mode') || 'null';
     const theme = this.getAttribute('theme') || 'default';
