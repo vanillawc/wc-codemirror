@@ -2,4 +2,5 @@
 .github/
 .vscode/
 dev/
+examples/
 *.tgz
