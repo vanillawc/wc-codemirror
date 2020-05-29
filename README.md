@@ -1,24 +1,35 @@
-[![GitHub Releases](https://badgen.net/github/tag/vanillawc/wc-codemirror)](https://github.com/vanillawc/wc-codemirror/releases)
-[![NPM Release](https://badgen.net/npm/v/@vanillawc/wc-codemirror)](https://www.npmjs.com/package/@vanillawc/wc-codemirror)
-[![Bundlephobia](https://badgen.net/bundlephobia/minzip/@vanillawc/wc-codemirror)](https://bundlephobia.com/result?p=@vanillawc/wc-codemirror)
-[![MIT License](https://badgen.net/github/license/vanillawc/wc-codemirror)](https://raw.githubusercontent.com/vanillawc/wc-codemirror/master/LICENSE)
-[![Published on WebComponents.org](https://img.shields.io/badge/webcomponents.org-published-blue.svg)](https://www.webcomponents.org/element/@vanillawc/wc-codemirror)
-[![Latest Status](https://github.com/vanillawc/wc-codemirror/workflows/Latest/badge.svg)](https://github.com/vanillawc/wc-codemirror/actions)
-[![Release Status](https://github.com/vanillawc/wc-codemirror/workflows/Release/badge.svg)](https://github.com/vanillawc/wc-codemirror/actions)
+<h1 align="center">&lt;wc-codemirror&gt;: Easily embed a CodeMirror editor</h1>
 
-A Vanilla Web Component to embed a CodeMirror editor into a web page
-
------
+<div align="center">
+  <a href="https://github.com/vanillawc/wc-codemirror/releases"><img src="https://badgen.net/github/tag/vanillawc/wc-codemirror" alt="GitHub Releases"></a>
+  <a href="https://www.npmjs.com/package/@vanillawc/wc-codemirror"><img src="https://badgen.net/npm/v/@vanillawc/wc-codemirror" alt="NPM Releases"></a>
+  <a href="https://bundlephobia.com/result?p=@vanillawc/wc-codemirror"><img src="https://badgen.net/bundlephobia/minzip/@vanillawc/wc-codemirror" alt="Bundlephobia"></a>
+  <a href="https://raw.githubusercontent.com/vanillawc/wc-codemirror/master/LICENSE"><img src="https://badgen.net/github/license/vanillawc/wc-codemirror" alt="MIT License"></a>
+  <a href="https://www.webcomponents.org/element/@vanillawc/wc-codemirror"><img src="https://img.shields.io/badge/webcomponents.org-published-blue.svg" alt="Published on WebComponents.org"></a>
+  <a href="https://github.com/vanillawc/wc-codemirror/actions"><img src="https://github.com/vanillawc/wc-codemirror/workflows/Latest/badge.svg" alt="Latest Status"></a>
+  <a href="https://github.com/vanillawc/wc-codemirror/actions"><img src="https://github.com/vanillawc/wc-codemirror/workflows/Release/badge.svg" alt="Release Status"></a>
+</div>
 
 ## Installation
 
+*Installation*
 ```sh
 npm i @vanillawc/wc-codemirror
 ```
 
-Then import the `index.js` file at the root of the package.
+*Import from NPM*
+```html
+<script type="module" src="node_modules/@vanillawc/wc-codemirror/index.js"></script>
+```
 
------
+*Import from CDN*
+```html
+<script type="module" src="https://cdn.jsdelivr.net/gh/vanillawc/wc-codemirror/index.js"></script>
+```
+
+## Demo
+
+Try it on [WebComponents.dev](https://webcomponents.dev/edit/uQEePfQ92jOWOpupDzps?sv=1&pm=1)
 
 ## Usage
 
@@ -35,36 +46,44 @@ Then import the `index.js` file at the root of the package.
 
 ### Basic Usage
 
+An empty tag loads a basic CodeMirror editor pane
+
 ```html
-<wc-codemirror src="sample.js"></wc-codemirror>
+<wc-codemirror></wc-codemirror>
+```
+
+## External Source
+
+Load an external source file with the `src` attribute
+
+```html
+<wc-codemirror src="sample.txt"></wc-codemirror>
 ```
 
 ### Syntax Highlighting
 
-```html
-<wc-codemirror mode="javascript" src="sample.js"></wc-codemirror>
-```
-
-Modes require importing an additional plugin file that can be found in the 'modes' dir
+Syntax highlighting requires importing a `mode` module for the language
 
 ```html
 <script type="module" src="[wc-codemirror]/mode/javascript/javascript.js"></script>
 ```
 
-### Theming
+Then specify the language with the `mode` attribute
 
 ```html
-<wc-codemirror mode="javascript" theme="monokai" src="sample.js"></wc-codemirror>
+<wc-codemirror mode="javascript" src="sample.js"></wc-codemirror>
 ```
 
-Themes require importing an additional css file that contains the theme CSS definitions 
+### Theming
+
+Theming requires importing an editor theme stylesheet
 
 ```html
 <link rel="stylesheet" href="[wc-codemirror]/theme/monokai.css">
 ```
 
------
+Then specify the theme with the `theme` attribute
 
-## Demos
-
-### [WC-CodeMirror - WebComponents.dev](https://webcomponents.dev/edit/uQEePfQ92jOWOpupDzps?sv=1&pm=1)
+```html
+<wc-codemirror mode="javascript" theme="monokai" src="sample.js"></wc-codemirror>
+```
