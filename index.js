@@ -9783,7 +9783,7 @@ class WCCodeMirror extends HTMLElement {
   }
 
   async connectedCallback () {
-    this.__element = this.querySelector('#code');
+    this.__element = this.querySelector('textarea');
     this.__element.style = this.hasAttribute('style') ? this.style.cssText : 'width:100%;height:100%';
 
     const mode = this.hasAttribute('mode') ? this.getAttribute('mode') : 'null';
@@ -9826,7 +9826,7 @@ class WCCodeMirror extends HTMLElement {
 
   static template () {
     return `
-      <textarea id="code" name="code"></textarea>
+      <textarea name="code"></textarea>
       `;
   }
 }
