@@ -60,6 +60,21 @@ Load an external source file with the `src` attribute
 <wc-codemirror src="sample.txt"></wc-codemirror>
 ```
 
+## Internal Source
+using internal sources is a little different, you have to add a script tag before adding content, since the html could modify the '<' and '>', and this behavior does not occur in script tags,
+
+```html
+<wc-codemirror>
+  <script type="wc-content">
+  function myGoodPerson(){
+     return "what can I do for you ?"
+  }
+  </script>
+</wc-codemirror>
+```
+
+**NOTE:** the `</script>` word cannot be used inside here
+
 ### Syntax Highlighting
 
 Syntax highlighting requires importing a `mode` module for the language
