@@ -9788,6 +9788,13 @@ class WCCodeMirror extends HTMLElement {
 
     const mode = this.hasAttribute('mode') ? this.getAttribute('mode') : 'null';
     const theme = this.hasAttribute('theme') ? this.getAttribute('theme') : 'default';
+    let content = "";
+    let innerScriptTag = this.querySelector('script');
+    if(innerScriptTag){
+      if(innerScriptTag.getAttribute("type") == "wc-content"){
+        content = WCCodeMirror.dedentText(innerScriptTag.innerHTML);
+      }
+    }
 
     this.__editor = CodeMirror.fromTextArea(this.__element, {
       lineNumbers: true,
@@ -9801,7 +9808,7 @@ class WCCodeMirror extends HTMLElement {
     } else {
       // delay until editor initializes
       await new Promise(resolve => setTimeout(resolve, 50));
-      this.setValue('');
+      this.setValue(content);
     }
 
     this.__initialized = true;
@@ -9828,6 +9835,53 @@ class WCCodeMirror extends HTMLElement {
     return `
       <textarea name="code"></textarea>
       `;
+  }
+
+  /**
+   * gets the padding from the first line, then removes the
+   * same amount padding from the rest of the lines, if possible
+   *
+   * useful for removing unnecessary padding in, say <script> tags
+   *
+   * @param {string} text - the text to dedent
+   * @returns {string} string without unnecessary line wist padding
+   */
+  static dedentText(text){
+      const lines = text.split("\n");
+
+      // remove the first line if it is an empty line
+      if(lines[0] == "") lines.splice(0, 1);
+
+      let initline = lines[0];
+      let fwdPad = 0;
+
+      while(true){
+          if(initline[fwdPad] == " "){
+              fwdPad += 1;
+          } else {
+              break;
+          }
+      }
+
+      let fixedLines = [];
+
+      for(let line of lines){
+          let fixedLine = line;
+          for(let i=0; i<fwdPad; i++){
+              if(fixedLine[0] == " "){
+                  fixedLine = fixedLine.substring(1);
+              } else {
+                  break;
+              }
+          }
+          fixedLines.push(fixedLine);
+      }
+
+      if(fixedLines[fixedLines.length - 1] == "") fixedLines.splice(fixedLines.length - 1, 1);
+
+      console.log(lines);
+      console.log(fixedLines);
+      return fixedLines.join("\n")
   }
 }
 
