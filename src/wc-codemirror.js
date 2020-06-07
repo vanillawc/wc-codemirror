@@ -2,7 +2,6 @@
 import CodeMirror from '../node_modules/codemirror/src/codemirror.js';
 self.CodeMirror = CodeMirror;
 
-
 /**
  * the WC codemirror class
  */
@@ -45,10 +44,10 @@ export class WCCodeMirror extends HTMLElement {
 
     const mode = this.hasAttribute('mode') ? this.getAttribute('mode') : 'null';
     const theme = this.hasAttribute('theme') ? this.getAttribute('theme') : 'default';
-    let content = "";
-    let innerScriptTag = this.querySelector('script');
-    if(innerScriptTag){
-      if(innerScriptTag.getAttribute("type") == "wc-content"){
+    let content = '';
+    const innerScriptTag = this.querySelector('script');
+    if (innerScriptTag) {
+      if (innerScriptTag.getAttribute('type') === 'wc-content') {
         content = WCCodeMirror.dedentText(innerScriptTag.innerHTML);
       }
     }
@@ -90,7 +89,7 @@ export class WCCodeMirror extends HTMLElement {
 
   static template () {
     return `
-      <textarea name="code"></textarea>
+      <textarea></textarea>
       `;
   }
 
@@ -103,44 +102,44 @@ export class WCCodeMirror extends HTMLElement {
    * @param {string} text - the text to dedent
    * @returns {string} string without unnecessary line wist padding
    */
-  static dedentText(text){
-      const lines = text.split("\n");
+  static dedentText (text) {
+    const lines = text.split('\n');
 
-      // remove the first line if it is an empty line
-      if(lines[0] == "") lines.splice(0, 1);
+    // remove the first line if it is an empty line
+    if (lines[0] === '') lines.splice(0, 1);
 
-      let initline = lines[0]
-      let fwdPad = 0;
+    const initline = lines[0];
+    let fwdPad = 0;
 
-      while(true){
-          if(initline[fwdPad] == " "){
-              fwdPad += 1
-          } else {
-              break;
-          }
+    while (true) {
+      if (initline[fwdPad] === ' ') {
+        fwdPad += 1;
+      } else {
+        break;
       }
+    }
 
-      let fixedLines = []
+    const fixedLines = [];
 
-      for(let line of lines){
-          let fixedLine = line
-          for(let i=0; i<fwdPad; i++){
-              if(fixedLine[0] == " "){
-                  fixedLine = fixedLine.substring(1)
-              } else {
-                  break;
-              }
-          }
-          fixedLines.push(fixedLine)
+    for (const line of lines) {
+      let fixedLine = line;
+      for (let i = 0; i < fwdPad; i++) {
+        if (fixedLine[0] === ' ') {
+          fixedLine = fixedLine.substring(1);
+        } else {
+          break;
+        }
       }
+      fixedLines.push(fixedLine);
+    }
 
-      if(fixedLines[fixedLines.length - 1] == "") fixedLines.splice(fixedLines.length - 1, 1)
+    if (fixedLines[fixedLines.length - 1] === '') fixedLines.splice(fixedLines.length - 1, 1);
 
-      return fixedLines.join("\n")
+    return fixedLines.join('\n');
   }
 }
 
-document.body.insertAdjacentHTML("beforeend", `
+document.body.insertAdjacentHTML('beforeend', `
       <style>
       /* BASICS */
 
@@ -492,6 +491,6 @@ document.body.insertAdjacentHTML("beforeend", `
       /* Help users use markselection to safely style text background */
       span.CodeMirror-selectedtext { background: none; }
       </style>
-`)
+`);
 
 customElements.define('wc-codemirror', WCCodeMirror);
