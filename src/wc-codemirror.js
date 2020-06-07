@@ -136,8 +136,6 @@ export class WCCodeMirror extends HTMLElement {
 
       if(fixedLines[fixedLines.length - 1] == "") fixedLines.splice(fixedLines.length - 1, 1)
 
-      console.log(lines)
-      console.log(fixedLines)
       return fixedLines.join("\n")
   }
 }
