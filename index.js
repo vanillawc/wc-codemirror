@@ -9766,7 +9766,7 @@ class WCCodeMirror extends HTMLElement {
     this.setSrc();
   }
 
-  get value () { return this.__editor.getValue(); }
+  get value () { return this.editor.getValue(); }
   set value (value) {
     this.setValue(value);
   }
@@ -9778,7 +9778,7 @@ class WCCodeMirror extends HTMLElement {
     this.appendChild(template.content.cloneNode(true));
     this.__initialized = false;
     this.__element = null;
-    this.__editor = null;
+    this.editor = null;
   }
 
   async connectedCallback () {
@@ -9787,6 +9787,11 @@ class WCCodeMirror extends HTMLElement {
 
     const mode = this.hasAttribute('mode') ? this.getAttribute('mode') : 'null';
     const theme = this.hasAttribute('theme') ? this.getAttribute('theme') : 'default';
+    let readOnly = this.getAttribute('read-only');
+
+    if(readOnly === '') readOnly = true;
+    else if(readOnly !== 'nocursor') readOnly = false;
+
     let content = '';
     const innerScriptTag = this.querySelector('script');
     if (innerScriptTag) {
@@ -9801,9 +9806,9 @@ class WCCodeMirror extends HTMLElement {
       viewportMargin = viewportMarginAttr === 'infinity' ? Infinity : parseInt(viewportMarginAttr);
     }
 
-    this.__editor = CodeMirror.fromTextArea(this.__element, {
+    this.editor = CodeMirror.fromTextArea(this.__element, {
       lineNumbers: true,
-      readOnly: false,
+      readOnly,
       mode,
       theme,
       viewportMargin
@@ -9823,13 +9828,13 @@ class WCCodeMirror extends HTMLElement {
   async setSrc () {
     const src = this.getAttribute('src');
     const contents = await this.fetchSrc(src);
-    this.__editor.swapDoc(CodeMirror.Doc(contents, this.getAttribute('mode')));
-    this.__editor.refresh();
+    this.editor.swapDoc(CodeMirror.Doc(contents, this.getAttribute('mode')));
+    this.editor.refresh();
   }
 
   async setValue (value) {
-    this.__editor.swapDoc(CodeMirror.Doc(value, this.getAttribute('mode')));
-    this.__editor.refresh();
+    this.editor.swapDoc(CodeMirror.Doc(value, this.getAttribute('mode')));
+    this.editor.refresh();
   }
 
   async fetchSrc (src) {
