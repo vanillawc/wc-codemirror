@@ -27,7 +27,16 @@
   <!-- <wc-codemirror src="sample.html" mode="htmlmixed" theme="duotone-light"></wc-code-mirror> -->
 
   <!-- everything -->
-  <wc-codemirror src="sample.js" mode="javascript" theme="monokai"></wc-code-mirror>
-
+  <h1> External content </h1>
+  <wc-codemirror src="sample.js" mode="javascript" theme="monokai"></wc-codemirror>
+  <br>
+  <h1> Content from script tag </h1>
+  <wc-codemirror mode="javascript">
+      <script type="wc-content">
+          function myGoodPerson(){
+             return "what can I do for you ?"
+          }
+      </script>
+  </wc-codemirror>
 </body>
 </html>
