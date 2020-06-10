@@ -74,12 +74,6 @@ export class WCCodeMirror extends HTMLElement {
       this.setValue(content);
     }
 
-    // boolean attributes generally have a value of ''
-    // attributes with no value have a value of null
-    if (this.getAttribute('fit-to-content') === '') {
-      this.fitToContent();
-    }
-
     this.__initialized = true;
   }
 
@@ -147,15 +141,6 @@ export class WCCodeMirror extends HTMLElement {
     if (fixedLines[fixedLines.length - 1] === '') fixedLines.splice(fixedLines.length - 1, 1);
 
     return fixedLines.join('\n');
-  }
-
-  /**
-   * function to fit data to content,
-   *
-   * note, this overrides the height parameter of css for codemirror
-   */
-  fitToContent () {
-    this.__editor.setSize(null, 'auto');
   }
 }
 
