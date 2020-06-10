@@ -9795,11 +9795,23 @@ class WCCodeMirror extends HTMLElement {
       }
     }
 
+    let viewportMargin = CodeMirror.defaults.viewportMargin;
+    const viewportMarginAttr = this.getAttribute('viewport-margin');
+
+    if (viewportMarginAttr) {
+      if (viewportMarginAttr === 'Infinity') {
+        viewportMargin = Infinity;
+      } else {
+        viewportMargin = parseInt(viewportMarginAttr);
+      }
+    }
+
     this.__editor = CodeMirror.fromTextArea(this.__element, {
       lineNumbers: true,
       readOnly: false,
       mode,
-      theme
+      theme,
+      viewportMargin
     });
 
     if (this.hasAttribute('src')) {
@@ -9808,6 +9820,12 @@ class WCCodeMirror extends HTMLElement {
       // delay until editor initializes
       await new Promise(resolve => setTimeout(resolve, 50));
       this.setValue(content);
+    }
+
+    // boolean attributes generally have a value of ''
+    // attributes with no value have a value of null
+    if (this.getAttribute('fit-to-content') === '') {
+      this.fitToContent();
     }
 
     this.__initialized = true;
@@ -9877,6 +9895,15 @@ class WCCodeMirror extends HTMLElement {
     if (fixedLines[fixedLines.length - 1] === '') fixedLines.splice(fixedLines.length - 1, 1);
 
     return fixedLines.join('\n');
+  }
+
+  /**
+   * function to fit data to content,
+   *
+   * note, this overrides the height parameter of css for codemirror
+   */
+  fitToContent () {
+    this.__editor.setSize(null, 'auto');
   }
 }
 
