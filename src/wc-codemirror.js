@@ -3,7 +3,7 @@ import CodeMirror from '../node_modules/codemirror/src/codemirror.js';
 self.CodeMirror = CodeMirror;
 
 /**
- * the WC codemirror class
+ * WCCodeMirror
  */
 export class WCCodeMirror extends HTMLElement {
   static get observedAttributes () {
@@ -94,13 +94,11 @@ export class WCCodeMirror extends HTMLElement {
   }
 
   /**
-   * gets the padding from the first line, then removes the
-   * same amount padding from the rest of the lines, if possible
-   *
-   * useful for removing unnecessary padding in, say <script> tags
+   * De-dents the code by getting the padding from the first line,
+   * then removes the same indent amount padding from the rest of the lines
    *
    * @param {string} text - the text to dedent
-   * @returns {string} string without unnecessary line wist padding
+   * @returns {string} the dedented text
    */
   static dedentText (text) {
     const lines = text.split('\n');
