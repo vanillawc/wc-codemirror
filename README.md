@@ -43,6 +43,7 @@ Try it on [WebComponents.dev](https://webcomponents.dev/edit/uQEePfQ92jOWOpupDzp
 
 **Properties**
 
+- `editor` - the CodeMirror editor instance
 - `value` - get/set the editor's contents
 
 *Note: The ID attribute is required when multiple editors instances are present*

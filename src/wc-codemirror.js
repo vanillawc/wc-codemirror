@@ -23,7 +23,7 @@ export class WCCodeMirror extends HTMLElement {
     this.setSrc();
   }
 
-  get value () { return this.__editor.getValue(); }
+  get value () { return this.editor.getValue(); }
   set value (value) {
     this.setValue(value);
   }
@@ -35,7 +35,7 @@ export class WCCodeMirror extends HTMLElement {
     this.appendChild(template.content.cloneNode(true));
     this.__initialized = false;
     this.__element = null;
-    this.__editor = null;
+    this.editor = null;
   }
 
   async connectedCallback () {
@@ -58,7 +58,7 @@ export class WCCodeMirror extends HTMLElement {
       viewportMargin = viewportMarginAttr === 'infinity' ? Infinity : parseInt(viewportMarginAttr);
     }
 
-    this.__editor = CodeMirror.fromTextArea(this.__element, {
+    this.editor = CodeMirror.fromTextArea(this.__element, {
       lineNumbers: true,
       readOnly: false,
       mode,
@@ -80,13 +80,13 @@ export class WCCodeMirror extends HTMLElement {
   async setSrc () {
     const src = this.getAttribute('src');
     const contents = await this.fetchSrc(src);
-    this.__editor.swapDoc(CodeMirror.Doc(contents, this.getAttribute('mode')));
-    this.__editor.refresh();
+    this.editor.swapDoc(CodeMirror.Doc(contents, this.getAttribute('mode')));
+    this.editor.refresh();
   }
 
   async setValue (value) {
-    this.__editor.swapDoc(CodeMirror.Doc(value, this.getAttribute('mode')));
-    this.__editor.refresh();
+    this.editor.swapDoc(CodeMirror.Doc(value, this.getAttribute('mode')));
+    this.editor.refresh();
   }
 
   async fetchSrc (src) {
