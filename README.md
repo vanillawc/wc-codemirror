@@ -60,8 +60,9 @@ Load an external source file with the `src` attribute
 <wc-codemirror src="sample.txt"></wc-codemirror>
 ```
 
-## Internal Source
-using internal sources is a little different, you have to add a script tag before adding content, since the html could modify the '<' and '>', and this behavior does not occur in script tags,
+## Inline Source
+
+Inline source can be loaded by including a `<script>` of type `wc-content` in the body of the component. The `<script>` wrapper is necessary so '<' and '>' chars in the source are not interpreted as HTML.
 
 ```html
 <wc-codemirror>
@@ -73,7 +74,7 @@ using internal sources is a little different, you have to add a script tag befor
 </wc-codemirror>
 ```
 
-**NOTE:** the `</script>` word cannot be used inside here
+*Note: The `</script>` word cannot be used inside here*
 
 ### Syntax Highlighting
 
