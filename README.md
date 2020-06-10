@@ -37,8 +37,9 @@ Try it on [WebComponents.dev](https://webcomponents.dev/edit/uQEePfQ92jOWOpupDzp
 
 - `src` - load an external source file
 - `style` - CSS styling (default `height:100%;width:100%;`)
-- `fit-to-content` - sets the underlying codemirrors height to auto
-- `viewport-margin` - this is directly passed on to the `viewportMargin` configuration of the codemirror (codemirror docs say to set this to infinity if you're [looking to auto-size the codemirror](https://codemirror.net/demo/resize.html), in certain might have to set this to "Infinity")
+- `viewport-margin`<sup>1</sup> - sets the `viewportMargin` option of the CodeMirrror editor instance (default `10`)
+
+*<sup>1</sup>Setting `viewport-margin` to `infinity` will auto-resize the editor to its contents. To see this in action, check out the [CodeMirror Auto-Resize Demo](https://codemirror.net/demo/resize.html).*
 
 **Properties**
 
