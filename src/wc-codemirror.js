@@ -55,7 +55,7 @@ export class WCCodeMirror extends HTMLElement {
     let viewportMargin = CodeMirror.defaults.viewportMargin;
     if (this.hasAttribute('viewport-margin')) {
       const viewportMarginAttr = this.getAttribute('viewport-margin').toLowerCase();
-      viewportMargin = viewportMarginAttr === 'infinity' ? Infinity : parseInt(viewportMarginAttr); 
+      viewportMargin = viewportMarginAttr === 'infinity' ? Infinity : parseInt(viewportMarginAttr);
     }
 
     this.__editor = CodeMirror.fromTextArea(this.__element, {
