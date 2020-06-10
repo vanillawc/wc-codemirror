@@ -107,3 +107,5 @@ Then specify the theme with the `theme` attribute
 ```html
 <wc-codemirror mode="javascript" theme="monokai"></wc-codemirror>
 ```
+
+*Note: Check out the [CodeMirror Theme Demo](https://codemirror.net/demo/theme.html) to try sample the full selection of editor themes.*
