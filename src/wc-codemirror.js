@@ -44,6 +44,11 @@ export class WCCodeMirror extends HTMLElement {
 
     const mode = this.hasAttribute('mode') ? this.getAttribute('mode') : 'null';
     const theme = this.hasAttribute('theme') ? this.getAttribute('theme') : 'default';
+    let readOnly = this.getAttribute('readonly');
+
+    if(readOnly === '') readOnly = true;
+    else if(readOnly !== 'nocursor') readOnly = false;
+
     let content = '';
     const innerScriptTag = this.querySelector('script');
     if (innerScriptTag) {
@@ -60,7 +65,7 @@ export class WCCodeMirror extends HTMLElement {
 
     this.editor = CodeMirror.fromTextArea(this.__element, {
       lineNumbers: true,
-      readOnly: false,
+      readOnly,
       mode,
       theme,
       viewportMargin

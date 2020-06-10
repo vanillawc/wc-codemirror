@@ -38,9 +38,9 @@ Try it on [WebComponents.dev](https://webcomponents.dev/edit/uQEePfQ92jOWOpupDzp
 - `src` - load an external source file
 - `style` - CSS styling (default `height:100%;width:100%;`)
 - `viewport-margin`<sup>1</sup> - sets the `viewportMargin` option of the CodeMirrror editor instance (default `10`)
+- `readonly` - sets the codemirror's "readOnly" configuration attribute to true, you may set `readonly="nocursor"` if you want to disable the cursor and not let the user copy the text inside
 
 *<sup>1</sup>Setting `viewport-margin` to `infinity` will auto-resize the editor to its contents. To see this in action, check out the [CodeMirror Auto-Resize Demo](https://codemirror.net/demo/resize.html).*
-
 **Properties**
 
 - `editor` - the CodeMirror editor instance
@@ -69,7 +69,7 @@ Load an external source file with the `src` attribute
 Inline source can be loaded by including a `<script>` of type `wc-content` in the body of the component. The `<script>` wrapper is necessary so '<' and '>' chars in the source are not interpreted as HTML.
 
 ```html
-<wc-codemirror>
+<wc-codemirror mode="javascript">
   <script type="wc-content">
   function myGoodPerson(){
      return "what can I do for you ?"
