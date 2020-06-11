@@ -46,8 +46,8 @@ export class WCCodeMirror extends HTMLElement {
     const theme = this.hasAttribute('theme') ? this.getAttribute('theme') : 'default';
     let readOnly = this.getAttribute('readonly');
 
-    if(readOnly === '') readOnly = true;
-    else if(readOnly !== 'nocursor') readOnly = false;
+    if (readOnly === '') readOnly = true;
+    else if (readOnly !== 'nocursor') readOnly = false;
 
     let content = '';
     const innerScriptTag = this.querySelector('script');
