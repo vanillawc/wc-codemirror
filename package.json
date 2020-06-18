@@ -1,6 +1,6 @@
 {
   "name": "@vanillawc/wc-codemirror",
-  "version": "1.7.3",
+  "version": "1.8.0",
   "license": "MIT",
   "author": "Evan Plaice <evanplaice@gmail.com> (https://evanplaice.com/)",
   "description": "CodeMirror as a vanilla web component",
