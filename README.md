@@ -41,6 +41,7 @@ Try it on [WebComponents.dev](https://webcomponents.dev/edit/uQEePfQ92jOWOpupDzp
 - `readonly` - sets the codemirror's "readOnly" configuration attribute to true, you may set `readonly="nocursor"` if you want to disable the cursor and not let the user copy the text inside
 
 *<sup>1</sup>Setting `viewport-margin` to `infinity` will auto-resize the editor to its contents. To see this in action, check out the [CodeMirror Auto-Resize Demo](https://codemirror.net/demo/resize.html).*
+
 **Properties**
 
 - `editor` - the CodeMirror editor instance
@@ -56,15 +57,7 @@ An empty tag loads a basic CodeMirror editor pane
 <wc-codemirror></wc-codemirror>
 ```
 
-## External Source
-
-Load an external source file with the `src` attribute
-
-```html
-<wc-codemirror src="sample.txt"></wc-codemirror>
-```
-
-## Inline Source
+### Inline Source
 
 Inline source can be loaded by including a `<script>` of type `wc-content` in the body of the component. The `<script>` wrapper is necessary so '<' and '>' chars in the source are not interpreted as HTML.
 
@@ -79,6 +72,14 @@ Inline source can be loaded by including a `<script>` of type `wc-content` in th
 ```
 
 *Note: The `</script>` word cannot be used inside here*
+
+### External Source
+
+Load an external source file with the `src` attribute
+
+```html
+<wc-codemirror src="sample.txt"></wc-codemirror>
+```
 
 ### Syntax Highlighting
 
