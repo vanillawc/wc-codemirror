@@ -28,7 +28,8 @@
   "devDependencies": {
     "codemirror": "^5.54.0",
     "rollup-plugin-terser": "^5.2.0",
-    "semistandard": "^14.2.0"
+    "semistandard": "^14.2.0",
+    "tape-es": "^1.2.9"
   },
   "semistandard": {
     "ignore": [
@@ -36,5 +37,8 @@
       "mode/*",
       "index.js"
     ]
+  },
+  "engines": {
+    "node": "~14"
   }
 }
