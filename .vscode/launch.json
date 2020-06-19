@@ -20,6 +20,13 @@
       "pathMapping": {
         "/dev/": "${workspaceFolder}/dev/"
       }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Test",
+      "runtimeVersion": "14.3.0",
+      "program": "${file}"
     }
   ]
 }
