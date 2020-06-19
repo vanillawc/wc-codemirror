@@ -56,6 +56,7 @@ export class WCCodeMirror extends HTMLElement {
     if (innerScriptTag) {
       if (innerScriptTag.getAttribute('type') === 'wc-content') {
         content = WCCodeMirror.dedentText(innerScriptTag.innerHTML);
+        content = content.replace(/&lt;(\/?script)&gt;/g, '<$1>');
       }
     }
 
@@ -91,8 +92,6 @@ export class WCCodeMirror extends HTMLElement {
   }
 
   async setValue (value) {
-    value = value.replace(/&gt;\/script&lt;/g, '</script>');
-    value = value.replace(/&gt;script&lt;/g, '<script>');
     this.editor.swapDoc(CodeMirror.Doc(value, this.getAttribute('mode')));
     this.editor.refresh();
   }
@@ -123,9 +122,11 @@ export class WCCodeMirror extends HTMLElement {
 
     const initline = lines[0];
     let fwdPad = 0;
+    const usingTabs = initline[0] === '\t';
+    const checkChar = usingTabs ? '\t' : '';
 
     while (true) {
-      if (initline[fwdPad] === ' ') {
+      if (initline[fwdPad] === checkChar) {
         fwdPad += 1;
       } else {
         break;
@@ -137,7 +138,7 @@ export class WCCodeMirror extends HTMLElement {
     for (const line of lines) {
       let fixedLine = line;
       for (let i = 0; i < fwdPad; i++) {
-        if (fixedLine[0] === ' ') {
+        if (fixedLine[0] === checkChar) {
           fixedLine = fixedLine.substring(1);
         } else {
           break;
