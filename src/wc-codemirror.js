@@ -85,11 +85,12 @@ export class WCCodeMirror extends HTMLElement {
   async setSrc () {
     const src = this.getAttribute('src');
     const contents = await this.fetchSrc(src);
-    this.editor.swapDoc(CodeMirror.Doc(contents, this.getAttribute('mode')));
-    this.editor.refresh();
+		this.setValue(contents)
   }
 
   async setValue (value) {
+		value = value.replace(/&gt;\/script&lt;/g, "</script>")
+		value = value.replace(/&gt;script&lt;/g, "<script>")
     this.editor.swapDoc(CodeMirror.Doc(value, this.getAttribute('mode')));
     this.editor.refresh();
   }
