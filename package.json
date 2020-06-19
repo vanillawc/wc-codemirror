@@ -27,6 +27,8 @@
   "dependencies": {},
   "devDependencies": {
     "codemirror": "^5.54.0",
+    "jsdom": "^16.2.2",
+    "jsdom-global": "^3.0.2",
     "rollup-plugin-terser": "^5.2.0",
     "semistandard": "^14.2.0",
     "tape-es": "^1.2.9"
