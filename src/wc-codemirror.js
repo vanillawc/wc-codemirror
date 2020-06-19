@@ -123,7 +123,7 @@ export class WCCodeMirror extends HTMLElement {
     const initline = lines[0];
     let fwdPad = 0;
     const usingTabs = initline[0] === '\t';
-    const checkChar = usingTabs ? '\t' : '';
+    const checkChar = usingTabs ? '\t' : ' ';
 
     while (true) {
       if (initline[fwdPad] === checkChar) {
