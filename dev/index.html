@@ -24,20 +24,7 @@
   </wc-codemirror> -->
 
   <!-- external -->
-  <!--<wc-codemirror src="sample.html"></wc-codemirror>-->
-
-  <!-- inline read-only="nocursor" -->
-	 <wc-codemirror mode="javascript" readonly="nocursor">
-		<script type="wc-content">
-				function myGoodPerson(){
-						return "what can I do for you ?"
-				}
-
-				function wouldYouLikeAScriptTag(){
-					return "&lt;script&gt;&lt;/script&gt;"
-				}
-		</script>
-	</wc-codemirror> 
+  <!--<wc-codemirror src="sample.txt"></wc-codemirror>-->
 
   <!-- syntax-highlighting -->
   <!-- <wc-codemirror mode="javascript"></wc-codemirror> -->
@@ -59,6 +46,20 @@
         }
     </script>
   </wc-codemirror> -->
+
+  <!-- inline escape <script> -->
+  <!-- TODO: make this a test -->
+  <wc-codemirror mode="javascript">
+    <script type="wc-content">
+      function myGoodPerson(){
+        return "what can I do for you ?"
+      }
+
+      function wouldYouLikeAScriptTag(){
+        return "&lt;script&gt;&lt;/script&gt;"
+      }
+  </script>
+</wc-codemirror> 
 
 </body>
 </html>
