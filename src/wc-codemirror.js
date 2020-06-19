@@ -56,7 +56,7 @@ export class WCCodeMirror extends HTMLElement {
     if (innerScriptTag) {
       if (innerScriptTag.getAttribute('type') === 'wc-content') {
         content = WCCodeMirror.dedentText(innerScriptTag.innerHTML);
-        content = content.replace(/&lt;(\/?script)&gt;/g, '<$1>');
+        content = content.replace(/&lt;(\/?script)(.*?)&gt;/g, '<$1$2>');
       }
     }
 
