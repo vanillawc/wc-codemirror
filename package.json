@@ -24,7 +24,9 @@
     "preversion": "npm run lint",
     "postversion": "git push --follow-tags"
   },
-  "dependencies": {},
+  "dependencies": {
+    "babel-eslint": "^10.1.0"
+  },
   "devDependencies": {
     "codemirror": "^5.54.0",
     "jsdom": "^16.2.2",
@@ -34,6 +36,7 @@
     "tape-es": "^1.2.9"
   },
   "semistandard": {
+    "parser": "babel-eslint",
     "ignore": [
       "dev/*",
       "mode/*",
