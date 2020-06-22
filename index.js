@@ -10105,23 +10105,23 @@ self.CodeMirror = CodeMirror;
  */
 class WCCodeMirror extends HTMLElement {
   static get observedAttributes () {
-    return ['src'];
+    return ['src']
   }
 
   attributeChangedCallback (name, oldValue, newValue) {
-    if (!this.__initialized) { return; }
+    if (!this.__initialized) { return }
     if (oldValue !== newValue) {
       this[name] = newValue;
     }
   }
 
-  get src () { return this.getAttribute('src'); }
+  get src () { return this.getAttribute('src') }
   set src (value) {
     this.setAttribute('src', value);
     this.setSrc();
   }
 
-  get value () { return this.editor.getValue(); }
+  get value () { return this.editor.getValue() }
   set value (value) {
     this.setValue(value);
   }
@@ -10194,13 +10194,13 @@ class WCCodeMirror extends HTMLElement {
 
   async fetchSrc (src) {
     const response = await fetch(src);
-    return response.text();
+    return response.text()
   }
 
   static template () {
     return `
       <textarea style="display:inherit; width:inherit; height:inherit;"></textarea>
-    `;
+    `
   }
 
   /**
@@ -10225,7 +10225,7 @@ class WCCodeMirror extends HTMLElement {
       if (initline[fwdPad] === checkChar) {
         fwdPad += 1;
       } else {
-        break;
+        break
       }
     }
 
@@ -10237,7 +10237,7 @@ class WCCodeMirror extends HTMLElement {
         if (fixedLine[0] === checkChar) {
           fixedLine = fixedLine.substring(1);
         } else {
-          break;
+          break
         }
       }
       fixedLines.push(fixedLine);
@@ -10245,7 +10245,7 @@ class WCCodeMirror extends HTMLElement {
 
     if (fixedLines[fixedLines.length - 1] === '') fixedLines.splice(fixedLines.length - 1, 1);
 
-    return fixedLines.join('\n');
+    return fixedLines.join('\n')
   }
 }
 

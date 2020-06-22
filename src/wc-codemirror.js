@@ -1,69 +1,69 @@
 /* eslint no-undef: 0 */
-import CodeMirror from '../node_modules/codemirror/src/codemirror.js';
-import './styling.js';
+import CodeMirror from '../node_modules/codemirror/src/codemirror.js'
+import './styling.js'
 
-self.CodeMirror = CodeMirror;
+self.CodeMirror = CodeMirror
 
 /**
  * WCCodeMirror
  */
 export class WCCodeMirror extends HTMLElement {
   static get observedAttributes () {
-    return ['src'];
+    return ['src']
   }
 
   attributeChangedCallback (name, oldValue, newValue) {
-    if (!this.__initialized) { return; }
+    if (!this.__initialized) { return }
     if (oldValue !== newValue) {
-      this[name] = newValue;
+      this[name] = newValue
     }
   }
 
-  get src () { return this.getAttribute('src'); }
+  get src () { return this.getAttribute('src') }
   set src (value) {
-    this.setAttribute('src', value);
-    this.setSrc();
+    this.setAttribute('src', value)
+    this.setSrc()
   }
 
-  get value () { return this.editor.getValue(); }
+  get value () { return this.editor.getValue() }
   set value (value) {
-    this.setValue(value);
+    this.setValue(value)
   }
 
   constructor () {
-    super();
-    const template = document.createElement('template');
-    template.innerHTML = WCCodeMirror.template();
-    this.appendChild(template.content.cloneNode(true));
-    this.__initialized = false;
-    this.__element = null;
-    this.editor = null;
+    super()
+    const template = document.createElement('template')
+    template.innerHTML = WCCodeMirror.template()
+    this.appendChild(template.content.cloneNode(true))
+    this.__initialized = false
+    this.__element = null
+    this.editor = null
   }
 
   async connectedCallback () {
-    this.style.display = 'block';
-    this.__element = this.querySelector('textarea');
+    this.style.display = 'block'
+    this.__element = this.querySelector('textarea')
 
-    const mode = this.hasAttribute('mode') ? this.getAttribute('mode') : 'null';
-    const theme = this.hasAttribute('theme') ? this.getAttribute('theme') : 'default';
-    let readOnly = this.getAttribute('readonly');
+    const mode = this.hasAttribute('mode') ? this.getAttribute('mode') : 'null'
+    const theme = this.hasAttribute('theme') ? this.getAttribute('theme') : 'default'
+    let readOnly = this.getAttribute('readonly')
 
-    if (readOnly === '') readOnly = true;
-    else if (readOnly !== 'nocursor') readOnly = false;
+    if (readOnly === '') readOnly = true
+    else if (readOnly !== 'nocursor') readOnly = false
 
-    let content = '';
-    const innerScriptTag = this.querySelector('script');
+    let content = ''
+    const innerScriptTag = this.querySelector('script')
     if (innerScriptTag) {
       if (innerScriptTag.getAttribute('type') === 'wc-content') {
-        content = WCCodeMirror.dedentText(innerScriptTag.innerHTML);
-        content = content.replace(/&lt;(\/?script)(.*?)&gt;/g, '<$1$2>');
+        content = WCCodeMirror.dedentText(innerScriptTag.innerHTML)
+        content = content.replace(/&lt;(\/?script)(.*?)&gt;/g, '<$1$2>')
       }
     }
 
-    let viewportMargin = CodeMirror.defaults.viewportMargin;
+    let viewportMargin = CodeMirror.defaults.viewportMargin
     if (this.hasAttribute('viewport-margin')) {
-      const viewportMarginAttr = this.getAttribute('viewport-margin').toLowerCase();
-      viewportMargin = viewportMarginAttr === 'infinity' ? Infinity : parseInt(viewportMarginAttr);
+      const viewportMarginAttr = this.getAttribute('viewport-margin').toLowerCase()
+      viewportMargin = viewportMarginAttr === 'infinity' ? Infinity : parseInt(viewportMarginAttr)
     }
 
     this.editor = CodeMirror.fromTextArea(this.__element, {
@@ -72,39 +72,39 @@ export class WCCodeMirror extends HTMLElement {
       mode,
       theme,
       viewportMargin
-    });
+    })
 
     if (this.hasAttribute('src')) {
-      this.setSrc(this.getAttribute('src'));
+      this.setSrc(this.getAttribute('src'))
     } else {
       // delay until editor initializes
-      await new Promise(resolve => setTimeout(resolve, 50));
-      this.value = content;
+      await new Promise(resolve => setTimeout(resolve, 50))
+      this.value = content
     }
 
-    this.__initialized = true;
+    this.__initialized = true
   }
 
   async setSrc () {
-    const src = this.getAttribute('src');
-    const contents = await this.fetchSrc(src);
-    this.value = contents;
+    const src = this.getAttribute('src')
+    const contents = await this.fetchSrc(src)
+    this.value = contents
   }
 
   async setValue (value) {
-    this.editor.swapDoc(CodeMirror.Doc(value, this.getAttribute('mode')));
-    this.editor.refresh();
+    this.editor.swapDoc(CodeMirror.Doc(value, this.getAttribute('mode')))
+    this.editor.refresh()
   }
 
   async fetchSrc (src) {
-    const response = await fetch(src);
-    return response.text();
+    const response = await fetch(src)
+    return response.text()
   }
 
   static template () {
     return `
       <textarea style="display:inherit; width:inherit; height:inherit;"></textarea>
-    `;
+    `
   }
 
   /**
@@ -115,42 +115,42 @@ export class WCCodeMirror extends HTMLElement {
    * @returns {string} the dedented text
    */
   static dedentText (text) {
-    const lines = text.split('\n');
+    const lines = text.split('\n')
 
     // remove the first line if it is an empty line
-    if (lines[0] === '') lines.splice(0, 1);
+    if (lines[0] === '') lines.splice(0, 1)
 
-    const initline = lines[0];
-    let fwdPad = 0;
-    const usingTabs = initline[0] === '\t';
-    const checkChar = usingTabs ? '\t' : ' ';
+    const initline = lines[0]
+    let fwdPad = 0
+    const usingTabs = initline[0] === '\t'
+    const checkChar = usingTabs ? '\t' : ' '
 
     while (true) {
       if (initline[fwdPad] === checkChar) {
-        fwdPad += 1;
+        fwdPad += 1
       } else {
-        break;
+        break
       }
     }
 
-    const fixedLines = [];
+    const fixedLines = []
 
     for (const line of lines) {
-      let fixedLine = line;
+      let fixedLine = line
       for (let i = 0; i < fwdPad; i++) {
         if (fixedLine[0] === checkChar) {
-          fixedLine = fixedLine.substring(1);
+          fixedLine = fixedLine.substring(1)
         } else {
-          break;
+          break
         }
       }
-      fixedLines.push(fixedLine);
+      fixedLines.push(fixedLine)
     }
 
-    if (fixedLines[fixedLines.length - 1] === '') fixedLines.splice(fixedLines.length - 1, 1);
+    if (fixedLines[fixedLines.length - 1] === '') fixedLines.splice(fixedLines.length - 1, 1)
 
-    return fixedLines.join('\n');
+    return fixedLines.join('\n')
   }
 }
 
-customElements.define('wc-codemirror', WCCodeMirror);
+customElements.define('wc-codemirror', WCCodeMirror)
