@@ -15,7 +15,7 @@
   "type": "module",
   "scripts": {
     "start": "npx live-server --no-browser --port=5500 --open=dev",
-    "lint": "semistandard",
+    "lint": "esmtk lint",
     "build": "npm run build:main && npm run build:min",
     "build:main": "npx rollup --config .config/main.config.js",
     "build:min": "npx rollup --config .config/min.config.js",
@@ -27,10 +27,10 @@
   "dependencies": {},
   "devDependencies": {
     "codemirror": "^5.54.0",
-    "rollup-plugin-terser": "^5.2.0",
-    "semistandard": "^14.2.0"
+    "esmtk": "^0.1.1",
+    "rollup-plugin-terser": "^5.2.0"
   },
-  "semistandard": {
+  "standard": {
     "ignore": [
       "dev/*",
       "mode/*",
