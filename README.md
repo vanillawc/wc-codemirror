@@ -1,4 +1,4 @@
-<h1 align="center">&lt;wc-codemirror&gt;: Easily embed a CodeMirror editor</h1>
+<h1 align="center">&lt;wc-codemirror&gt; Easily embed a CodeMirror editor</h1>
 
 <div align="center">
   <a href="https://github.com/vanillawc/wc-codemirror/releases"><img src="https://badgen.net/github/tag/vanillawc/wc-codemirror" alt="GitHub Releases"></a>
