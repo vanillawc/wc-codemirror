@@ -16,19 +16,17 @@
   "scripts": {
     "start": "npx live-server --no-browser --port=5500 --open=dev",
     "lint": "esmtk lint",
-    "build": "npm run build:main && npm run build:min",
-    "build:main": "npx rollup --config .config/main.config.js",
-    "build:min": "npx rollup --config .config/min.config.js",
-    "build:assets": "cp -r ./node_modules/codemirror/theme/* ./theme/ && cp -r ./node_modules/codemirror/mode/* ./mode/",
+    "build": "npm run bundle && npm run minify",
+    "bundle": "esmtk bundle src/wc-codemirror.js index.js",
+    "minify": "esmtk minify src/wc-codemirror.js index.min.js",
+    "copy": "cp -r ./node_modules/codemirror/theme/* ./theme/ && cp -r ./node_modules/codemirror/mode/* ./mode/",
     "package": "npx rimraf package && npm pack | tail -n 1 | xargs tar -xf",
     "preversion": "npm run lint",
     "postversion": "git push --follow-tags"
   },
-  "dependencies": {},
   "devDependencies": {
     "codemirror": "^5.54.0",
-    "esmtk": "^0.1.1",
-    "rollup-plugin-terser": "^5.2.0"
+    "esmtk": "^0.4.0"
   },
   "standard": {
     "ignore": [
