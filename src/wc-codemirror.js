@@ -9,13 +9,20 @@ self.CodeMirror = CodeMirror
  */
 export class WCCodeMirror extends HTMLElement {
   static get observedAttributes () {
-    return ['src']
+    return ['src', 'readonly']
   }
 
   attributeChangedCallback (name, oldValue, newValue) {
     if (!this.__initialized) { return }
     if (oldValue !== newValue) {
-      this[name] = newValue
+      switch(name) {
+        case 'readonly':
+          this.editor.setOption('readOnly', newValue !== null)
+          break;
+        default:
+          this[name] = newValue;
+          break;
+      }
     }
   }
 
