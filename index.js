@@ -9630,22 +9630,37 @@ span.CodeMirror-selectedtext { background: none; }
 self.CodeMirror = codemirror_default;
 class WCCodeMirror extends HTMLElement {
   static get observedAttributes() {
-    return ["src", "readonly"];
+    return ["src", "readonly", "mode", "theme"];
   }
   attributeChangedCallback(name, oldValue, newValue) {
     if (!this.__initialized) {
       return;
     }
     if (oldValue !== newValue) {
-      switch (name) {
-        case "readonly":
-          this.editor.setOption("readOnly", newValue !== null);
-          break;
-        default:
-          this[name] = newValue;
-          break;
+      if (name === "readonly") {
+        this[name] = newValue !== null;
+      } else {
+        this[name] = newValue;
       }
     }
+  }
+  get readonly() {
+    return this.editor.getOption("readOnly");
+  }
+  set readonly(value) {
+    this.editor.setOption("readOnly", value);
+  }
+  get mode() {
+    return this.editor.getOption("mode");
+  }
+  set mode(value) {
+    this.editor.setOption("mode", value);
+  }
+  get theme() {
+    return this.editor.getOption("theme");
+  }
+  set theme(value) {
+    this.editor.setOption("theme", value);
   }
   get src() {
     return this.getAttribute("src");
