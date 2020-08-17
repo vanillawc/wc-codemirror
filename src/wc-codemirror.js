@@ -104,6 +104,12 @@ export class WCCodeMirror extends HTMLElement {
     this.__initialized = true
   }
 
+  disconnectedCallback() {
+    this.editor && this.editor.toTextArea()
+    this.editor = null
+    this.__initialized = false
+  }
+
   async setSrc () {
     const src = this.getAttribute('src')
     const contents = await this.fetchSrc(src)
