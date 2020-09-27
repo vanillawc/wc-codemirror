@@ -859,7 +859,7 @@ class StringStream3 {
     return oracle && oracle.baseToken(this.pos);
   }
 }
-var StringStream_default = StringStream3;
+const StringStream_default = StringStream3;
 
 // node_modules/codemirror/src/line/utils_line.js
 function getLine(doc, n) {
@@ -6003,7 +6003,7 @@ Doc4.prototype = createObj(BranchChunk.prototype, {
   })
 });
 Doc4.prototype.eachLine = Doc4.prototype.iter;
-var Doc_default = Doc4;
+const Doc_default = Doc4;
 
 // node_modules/codemirror/src/edit/drop_events.js
 let lastDrop = 0;
@@ -7267,7 +7267,7 @@ function defineOptions(CodeMirror6) {
     for (let i = newBreaks.length - 1; i >= 0; i--)
       replaceRange(cm.doc, val, newBreaks[i], Pos(newBreaks[i].line, newBreaks[i].ch + val.length));
   });
-  option("specialChars", /[\u0000-\u001f\u007f-\u009f\u00ad\u061c\u200b-\u200c\u200e\u200f\u2028\u2029\ufeff\ufff9-\ufffc]/g, (cm, val, old) => {
+  option("specialChars", /[\u0000-\u001f\u007f-\u009f\u00ad\u061c\u200b-\u200f\u2028\u2029\ufeff\ufff9-\ufffc]/g, (cm, val, old) => {
     cm.state.specialChars = new RegExp(val.source + (val.test("	") ? "" : "|	"), "g");
     if (old != Init)
       cm.refresh();
@@ -7451,7 +7451,7 @@ function CodeMirror(place, options3) {
 }
 CodeMirror.defaults = defaults;
 CodeMirror.optionHandlers = optionHandlers;
-var CodeMirror_default = CodeMirror;
+const CodeMirror_default = CodeMirror;
 function registerEventHandlers(cm) {
   let d = cm.display;
   on(d.scroller, "mousedown", operation(cm, onMouseDown));
@@ -7666,7 +7666,7 @@ function applyTextInput(cm, inserted, deleted, sel, origin) {
         from = Pos(from.line, from.ch - deleted);
       else if (cm.state.overwrite && !paste)
         to = Pos(to.line, Math.min(getLine(doc, to.line).text.length, to.ch + lst(textLines).length));
-      else if (paste && lastCopied && lastCopied.lineWise && lastCopied.text.join("\n") == textLines.join("\n"))
+      else if (paste && lastCopied && lastCopied.lineWise && lastCopied.text.join("\n") == inserted)
         from = to = Pos(from.line, 0);
     }
     let changeEvent = {
@@ -9266,10 +9266,10 @@ CodeMirror.defineDocExtension = (name, func) => {
 };
 CodeMirror.fromTextArea = fromTextArea;
 addLegacyProps(CodeMirror);
-CodeMirror.version = "5.56.0";
+CodeMirror.version = "5.54.0";
 
 // node_modules/codemirror/src/codemirror.js
-var codemirror_default = CodeMirror;
+const codemirror_default = CodeMirror;
 
 // src/styling.js
 document.body.insertAdjacentHTML("beforeend", `
