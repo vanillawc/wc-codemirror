@@ -18,23 +18,23 @@ export class WCCodeMirror extends HTMLElement {
       if (name === 'readonly') {
         this[name] = newValue !== null
       } else {
-        this[name] = newValue;
+        this[name] = newValue
       }
     }
   }
 
-  get readonly() { return this.editor.getOption('readOnly') }
-  set readonly(value) {
+  get readonly () { return this.editor.getOption('readOnly') }
+  set readonly (value) {
     this.editor.setOption('readOnly', value)
   }
 
-  get mode() { return this.editor.getOption('mode') }
-  set mode(value) {
+  get mode () { return this.editor.getOption('mode') }
+  set mode (value) {
     this.editor.setOption('mode', value)
   }
 
-  get theme() { return this.editor.getOption('theme') }
-  set theme(value) {
+  get theme () { return this.editor.getOption('theme') }
+  set theme (value) {
     this.editor.setOption('theme', value)
   }
 
