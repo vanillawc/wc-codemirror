@@ -19,7 +19,9 @@
     "build": "npm run build:esm && npm run build:min",
     "build:esm": "esmtk commonjs src/wc-codemirror.js index.js",
     "build:min": "esmtk minify src/wc-codemirror.js index.min.js",
-    "copy": "cp -r ./node_modules/codemirror/theme/* ./theme/ && cp -r ./node_modules/codemirror/mode/* ./mode/",
+    "copy": "npm run copy:themes && npm run copy:modes",
+    "copy:themes": "cp -r ./node_modules/codemirror/theme/* ./theme/",
+    "copy:modes": "cp -r ./node_modules/codemirror/mode/* ./mode/",
     "package": "npx rimraf package && npm pack | tail -n 1 | xargs tar -xf",
     "preversion": "npm run lint",
     "postversion": "git push --follow-tags"
