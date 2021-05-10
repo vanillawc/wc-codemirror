@@ -104,7 +104,7 @@ export class WCCodeMirror extends HTMLElement {
     this.__initialized = true
   }
 
-  disconnectedCallback() {
+  disconnectedCallback () {
     this.editor && this.editor.toTextArea()
     this.editor = null
     this.__initialized = false
