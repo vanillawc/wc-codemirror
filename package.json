@@ -17,7 +17,7 @@
     "start": "npx live-server --no-browser --port=5500 --open=dev",
     "lint": "esmtk lint",
     "build": "npm run build:esm && npm run build:min",
-    "build:esm": "esmtk commonjs src/wc-codemirror.js index.js",
+    "build:esm": "esmtk bundle src/wc-codemirror.js index.js",
     "build:min": "esmtk minify src/wc-codemirror.js index.min.js",
     "copy": "npm run copy:themes && npm run copy:modes",
     "copy:themes": "cp -r ./node_modules/codemirror/theme/* ./theme/",
