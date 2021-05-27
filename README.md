@@ -11,16 +11,16 @@
   <a href="https://www.webcomponents.org/element/@vanillawc/wc-codemirror"><img src="https://img.shields.io/badge/webcomponents.org-published-blue.svg" alt="Published on WebComponents.org"></a>
 </div>
 
-## Installation
+## Setup
 
-*Installation*
+*Install and import from [NPM](https://www.npmjs.com/package/@vanillawc/wc-codemirror)*
+
 ```sh
 npm i @vanillawc/wc-codemirror
 ```
 
-*Import from NPM*
 ```html
-<script type="module" src="node_modules/@vanillawc/wc-codemirror/index.js"></script>
+<script type="module" src="[node_modules]/@vanillawc/wc-codemirror/index.js"></script>
 ```
 
 *Import from CDN*
