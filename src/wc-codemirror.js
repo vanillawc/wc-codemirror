@@ -51,15 +51,17 @@ export class WCCodeMirror extends HTMLElement {
 
   constructor () {
     super()
-    const template = document.createElement('template')
-    template.innerHTML = WCCodeMirror.template()
-    this.appendChild(template.content.cloneNode(true))
     this.__initialized = false
     this.__element = null
     this.editor = null
   }
 
   async connectedCallback () {
+    // Create template
+    const template = document.createElement('template')
+    template.innerHTML = WCCodeMirror.template()
+    this.appendChild(template.content.cloneNode(true))
+    // Initialization
     this.style.display = 'block'
     this.__element = this.querySelector('textarea')
 
