@@ -46,11 +46,39 @@ export class WCCodeMirror extends HTMLElement {
 
   get value () { return this.editor.getValue() }
   set value (value) {
-    this.setValue(value)
+    if (this.__initialized) {
+      this.setValueForced(value)
+    } else {
+      // Save to pre init
+      this.__preInitValue = value
+    }
   }
 
   constructor () {
     super()
+
+    const observerConfig = {
+      childList: true,
+      characterData: true,
+      subtree: true
+    }
+
+    const linkChanged = (e) => {
+      return e.type === "childList" && 
+        (Array.from(e.addedNodes).some((e) => e.tagName === "LINK") ||
+         Array.from(e.removedNodes).some((e) => e.tagName === "LINK"))
+    }
+
+    this.__observer = new MutationObserver((mutationsList, observer) => {
+      if (mutationsList.some(linkChanged)) {
+        this.refreshStyles();
+      }
+      this.lookupInnerScript((data) => {
+        this.value = data
+      })
+    })
+    this.__observer.observe(this, observerConfig)
+
     this.__initialized = false
     this.__element = null
     this.editor = null
@@ -60,7 +88,7 @@ export class WCCodeMirror extends HTMLElement {
     // Create template
     const shadow = this.attachShadow({ mode: 'open' })
     const template = document.createElement('template')
-    const stylesheet = document.createElement("style")
+    const stylesheet = document.createElement('style')
     stylesheet.innerHTML = CODE_MIRROR_CSS_CONTENT
     template.innerHTML = WCCodeMirror.template()
     shadow.appendChild(stylesheet)
@@ -78,14 +106,9 @@ export class WCCodeMirror extends HTMLElement {
 
     this.refreshStyles()
 
-    let content = ''
-    const innerScriptTag = this.querySelector('script')
-    if (innerScriptTag) {
-      if (innerScriptTag.getAttribute('type') === 'wc-content') {
-        content = WCCodeMirror.dedentText(innerScriptTag.innerHTML)
-        content = content.replace(/&lt;(\/?script)(.*?)&gt;/g, '<$1$2>')
-      }
-    }
+    this.lookupInnerScript((data) => {
+      this.value = data
+    })
 
     let viewportMargin = CodeMirror.defaults.viewportMargin
     if (this.hasAttribute('viewport-margin')) {
@@ -102,20 +125,23 @@ export class WCCodeMirror extends HTMLElement {
     })
 
     if (this.hasAttribute('src')) {
-      this.setSrc(this.getAttribute('src'))
-    } else {
-      // delay until editor initializes
-      await new Promise(resolve => setTimeout(resolve, 50))
-      this.value = content
+      this.setSrc()
     }
 
+    // delay until editor initializes
+    await new Promise(resolve => setTimeout(resolve, 50))
     this.__initialized = true
+
+    if (this.__preInitValue !== undefined) {
+      this.setValueForced(this.__preInitValue)
+    }
   }
 
   disconnectedCallback () {
     this.editor && this.editor.toTextArea()
     this.editor = null
     this.__initialized = false
+    this.__observer.disconnect()
   }
 
   async setSrc () {
@@ -124,7 +150,10 @@ export class WCCodeMirror extends HTMLElement {
     this.value = contents
   }
 
-  async setValue (value) {
+  /**
+   * Set value without initialization check
+   */
+  async setValueForced (value) {
     this.editor.swapDoc(CodeMirror.Doc(value, this.getAttribute('mode')))
     this.editor.refresh()
   }
@@ -153,6 +182,17 @@ export class WCCodeMirror extends HTMLElement {
     return `
       <textarea style="display:inherit; width:inherit; height:inherit;"></textarea>
     `
+  }
+
+  lookupInnerScript (callback) {
+    const innerScriptTag = this.querySelector('script')
+    if (innerScriptTag) {
+      if (innerScriptTag.getAttribute('type') === 'wc-content') {
+        let data = WCCodeMirror.dedentText(innerScriptTag.innerHTML)
+        data = data.replace(/&lt;(\/?script)(.*?)&gt;/g, '<$1$2>')
+        callback(data)
+      }
+    }
   }
 
   /**
