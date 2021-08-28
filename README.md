@@ -105,7 +105,20 @@ Can be used to mark a range of text with a specific CSS class name.
   <script type="wc-content">
     Hello world
   </script>
-  <mark-text from-line="1" from-char="7" to-line="1" to-char="11" options="{ 'css': 'color: red', 'title': 'cow' }" />
+  <mark-text from-line="1" from-char="7" to-line="1" to-char="11" options="{ 'css': 'color: red', 'title': 'cow' }"></mark-text>
+</wc-codemirror> 
+```
+
+### Gutter markers
+
+Can be used to add extra gutters (beyond of the line number gutter). Lines starts from zero. 
+
+```html
+<wc-codemirror>
+  <!-- Breakpoint -->
+  <gutters name="breakpoints">
+    <gutter line="1"><i style="color: red">●</i></gutter>  
+  </gutter>
 </wc-codemirror> 
 ```
 

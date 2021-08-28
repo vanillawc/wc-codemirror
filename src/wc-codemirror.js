@@ -57,84 +57,28 @@ export class WCCodeMirror extends HTMLElement {
   constructor () {
     super()
 
-    const observerConfig = {
-      childList: true,
-      characterData: true,
-      subtree: true
-    }
+    this.setupMutationObserver()
+    this.attachShadow({ mode: 'open' })
 
-    const nodeListContainsTag = (nodeList, tag) => {
-      const checkThatTag = (e) => e.tagName === tag
-      const removed = Array.from(nodeList)
-      return removed.some(checkThatTag)
-    }
-
-    const mutContainsRemovedTag = (tag) => (record) => {
-      return nodeListContainsTag(record.removedNodes, tag)
-    }
-
-    const mutContainsAddedTag = (tag) => (record) => {
-      return nodeListContainsTag(record.addedNodes, tag)
-    }
-
-    const mutContainsTag = (tag) => {
-      const containsAdded = mutContainsAddedTag(tag)
-      const containsRemoved = mutContainsRemovedTag(tag)
-      return (record) => containsAdded(record) || containsRemoved(record)
-    }
-
-    const mutContainsLink = mutContainsTag('LINK')
-    const mutContainsMarkText = mutContainsTag('MARK-TEXT')
-    const mutContainsRemovedScript = mutContainsRemovedTag('SCRIPT')
-    const mutContainsAddedScript = mutContainsAddedTag('SCRIPT')
-
-    this.__observer = new MutationObserver((mutationsList, observer) => {
-      let doRefreshMarks = false
-      mutationsList.forEach((record) => {
-        if (record.type === 'childList') {
-          if (mutContainsLink(record)) {
-            this.refreshStyleLinks()
-          }
-          if (mutContainsRemovedScript(record)) {
-            this.value = ''
-          }
-          if (mutContainsAddedScript(record)) {
-            this.refrestWcContent()
-          }
-          if (mutContainsMarkText(record)) {
-            doRefreshMarks = true
-          }
-        } else if (record.type === 'characterData') {
-          // Text data had been chaged. It's a reason to
-          // check wc-content
-          this.refrestWcContent()
-        }
-      })
-      if (doRefreshMarks) {
-        this.refreshMarkText()
-      }
-    })
-
-    this.__observer.observe(this, observerConfig)
+    // Create template
+    const template = document.createElement('template')
+    const stylesheet = document.createElement('style')
+    stylesheet.innerHTML = CODE_MIRROR_CSS_CONTENT
+    template.innerHTML = WCCodeMirror.template()
+    this.shadowRoot.appendChild(stylesheet)
+    this.shadowRoot.appendChild(template.content.cloneNode(true))
 
     this.__textMarks = []
+    this.__gutters = []
     this.__initialized = false
     this.__element = null
     this.editor = null
   }
 
   async connectedCallback () {
-    // Create template
-    const shadow = this.attachShadow({ mode: 'open' })
-    const template = document.createElement('template')
-    const stylesheet = document.createElement('style')
-    stylesheet.innerHTML = CODE_MIRROR_CSS_CONTENT
-    template.innerHTML = WCCodeMirror.template()
-    shadow.appendChild(stylesheet)
-    shadow.appendChild(template.content.cloneNode(true))
     // Initialization
     this.style.display = 'block'
-    this.__element = shadow.querySelector('textarea')
+    this.__element = this.shadowRoot.querySelector('textarea')
 
     const mode = this.hasAttribute('mode') ? this.getAttribute('mode') : 'null'
     const theme = this.hasAttribute('theme') ? this.getAttribute('theme') : 'default'
@@ -174,6 +118,7 @@ export class WCCodeMirror extends HTMLElement {
 
     // This should be invoked after text set
     this.refreshMarkText()
+    this.refreshGutters()
   }
 
   disconnectedCallback () {
@@ -250,6 +195,119 @@ export class WCCodeMirror extends HTMLElement {
           return { clear: () => {} }
         }
       })
+  }
+
+  refreshGutters () {
+    // Remove all gutters
+    this.__gutters.forEach(gutter => this.editor.clearGutter(gutter.name))
+    this.__gutters = Array.from(this.children)
+      .filter((g) => g.tagName === 'GUTTERS' && g.hasAttribute('name'))
+      .map((g) => {
+        return {
+          name: g.getAttribute('name'),
+          lines: Array.from(g.children)
+            .filter(e => e.tagName === 'GUTTER' && e.children.length > 0)
+            .map((e) => {
+              const line = parseInt(e.getAttribute('line'))
+              const firstChild = e.children[0]
+              return { line, marker: firstChild.cloneNode(true) }
+            })
+        }
+      })
+    this.editor.setOption('gutters', this.__gutters.map((g) => g.name))
+    // Setup markers
+    this.__gutters.forEach((g) => {
+      g.lines.forEach((e) => {
+        this.editor.setGutterMarker(e.line, g.name, e.marker)
+      })
+    })
+  }
+
+  setupMutationObserver () {
+    const observerConfig = {
+      childList: true,
+      characterData: true,
+      subtree: true,
+      attributes: true
+    }
+
+    const nodeListContainsTag = (nodeList, tag) => {
+      const checkThatTag = (e) => e.tagName === tag
+      const removed = Array.from(nodeList)
+      return removed.some(checkThatTag)
+    }
+
+    const mutContainsRemovedTag = (tag) => (record) => {
+      return nodeListContainsTag(record.removedNodes, tag)
+    }
+
+    const mutContainsAddedTag = (tag) => (record) => {
+      return nodeListContainsTag(record.addedNodes, tag)
+    }
+
+    const mutTargetHierarchyContainsTag = (tag) => (record) => {
+      let tagetMatched = false
+      for (let t = record.target; t !== null && t !== this; t = t.parentNode) {
+        if (t.tagName === tag) {
+          tagetMatched = true
+          break
+        }
+      }
+      return tagetMatched
+    }
+
+    const mutContainsTag = (tag) => {
+      const containsAdded = mutContainsAddedTag(tag)
+      const containsRemoved = mutContainsRemovedTag(tag)
+      const matchTarget = mutTargetHierarchyContainsTag(tag)
+
+      return (record) => matchTarget(record) || containsAdded(record) || containsRemoved(record)
+    }
+
+    const mutContainsLink = mutContainsTag('LINK')
+    const mutContainsMarkText = mutContainsTag('MARK-TEXT')
+    const mutContainsGutters = mutContainsTag('GUTTERS')
+    const mutContainsGutter = mutContainsTag('GUTTER')
+    const mutContainsRemovedScript = mutContainsRemovedTag('SCRIPT')
+    const mutContainsAddedScript = mutContainsAddedTag('SCRIPT')
+    const mutTargetHierarchyContainsScript = mutTargetHierarchyContainsTag('SCRIPT')
+
+    this.__observer = new MutationObserver((mutationsList, observer) => {
+      let doRefreshMarks = false
+      let doRefreshGutters = false
+
+      mutationsList.forEach((record) => {
+        if (mutContainsLink(record)) {
+          this.refreshStyleLinks()
+        }
+        if (mutContainsRemovedScript(record)) {
+          this.value = ''
+          doRefreshMarks = true
+          doRefreshGutters = true
+        }
+        if (mutContainsAddedScript(record) || mutTargetHierarchyContainsScript(record)) {
+          this.refrestWcContent()
+          doRefreshMarks = true
+          doRefreshGutters = true
+        }
+        if (mutContainsGutters(record) || mutContainsGutter(record)) {
+          doRefreshGutters = true
+        }
+        if (mutContainsMarkText(record)) {
+          doRefreshMarks = true
+        }
+      })
+
+      // Perform refresh
+      if (doRefreshMarks) {
+        this.refreshMarkText()
+      }
+      if (doRefreshGutters) {
+        this.refreshGutters()
+      }
+    })
+
+    this.__observer.observe(this, observerConfig)
   }
 
   static template () {
