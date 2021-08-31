@@ -103,6 +103,7 @@ export class WCCodeMirror extends HTMLElement {
 
     this.refreshStyleLinks()
     this.refrestWcContent()
+    this.setupEvents()
 
     if (this.hasAttribute('src')) {
       this.setSrc()
@@ -210,7 +211,7 @@ export class WCCodeMirror extends HTMLElement {
             .map((e) => {
               const line = parseInt(e.getAttribute('line'))
               const firstChild = e.children[0]
-              return { line, marker: firstChild.cloneNode(true) }
+              return { line, marker: firstChild }
             })
         }
       })
@@ -218,7 +219,7 @@ export class WCCodeMirror extends HTMLElement {
     // Setup markers
     this.__gutters.forEach((g) => {
       g.lines.forEach((e) => {
-        this.editor.setGutterMarker(e.line, g.name, e.marker)
+        this.editor.setGutterMarker(e.line, g.name, e.marker.cloneNode(true))
       })
     })
   }
@@ -308,6 +309,42 @@ export class WCCodeMirror extends HTMLElement {
     })
 
     this.__observer.observe(this, observerConfig)
+  }
+
+  setupEvent (type, ...argNames) {
+    CodeMirror.on(this.editor, type, (...args) => {
+      const detail = {}
+      args.shift() // Remove instance
+      args.forEach((arg, i) => {
+        detail[argNames[i]] = arg
+      })
+      const initDict = { bubbles: true, detail }
+      const event = new CustomEvent(type, initDict)
+      this.dispatchEvent(event)
+    })
+  }
+
+  setupEvents () {
+    this.setupEvent('change', 'changeObj')
+    this.setupEvent('changes', 'changes')
+    this.setupEvent('beforeChange', 'changeObj')
+    this.setupEvent('cursorActivity')
+    this.setupEvent('keyHandled', 'name', 'event')
+    this.setupEvent('inputRead', 'changeObj')
+    this.setupEvent('electricInput', 'line')
+    this.setupEvent('beforeSelectionChange', 'obj')
+    this.setupEvent('viewportChange', 'from', 'to')
+    this.setupEvent('swapDoc', 'oldDoc')
+    this.setupEvent('gutterClick', 'line', 'gutter', 'event')
+    this.setupEvent('gutterContextMenu', 'line', 'gutter', 'event')
+    this.setupEvent('focus', 'event')
+    this.setupEvent('blur', 'event')
+    this.setupEvent('scroll')
+    this.setupEvent('refresh')
+    this.setupEvent('optionChange', 'option')
+    this.setupEvent('scrollCursorIntoView', 'event')
+    this.setupEvent('update')
+    this.setupEvent('renderLine', 'line', 'element')
   }
 
   static template () {
