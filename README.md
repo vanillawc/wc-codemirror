@@ -98,16 +98,12 @@ Then specify the language with the `mode` attribute
 
 ### Theming
 
-Theming requires importing an editor theme stylesheet
+Theming requires importing an editor theme stylesheet within `wc-codemirror` tag. You can import few themes this way and switch them with the `theme` attribute.
 
 ```html
-<link rel="stylesheet" href="[wc-codemirror]/theme/monokai.css">
-```
-
-Then specify the theme with the `theme` attribute
-
-```html
-<wc-codemirror mode="javascript" theme="monokai"></wc-codemirror>
+<wc-codemirror mode="javascript" theme="monokai">
+  <link rel="stylesheet" href="[wc-codemirror]/theme/monokai.css">
+</wc-codemirror>
 ```
 
 *Note: Check out the [CodeMirror Theme Demo](https://codemirror.net/demo/theme.html) to try sample the full selection of editor themes.*

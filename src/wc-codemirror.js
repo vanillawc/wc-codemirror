@@ -1,6 +1,6 @@
 /* eslint no-undef: 0 */
 import CodeMirror from '../node_modules/codemirror/src/codemirror.js'
-import './styling.js'
+import { CODE_MIRROR_CSS_CONTENT } from './styling.js'
 
 self.CodeMirror = CodeMirror
 
@@ -58,12 +58,16 @@ export class WCCodeMirror extends HTMLElement {
 
   async connectedCallback () {
     // Create template
+    const shadow = this.attachShadow({ mode: 'open' })
     const template = document.createElement('template')
+    const stylesheet = document.createElement("style")
+    stylesheet.innerHTML = CODE_MIRROR_CSS_CONTENT
     template.innerHTML = WCCodeMirror.template()
-    this.appendChild(template.content.cloneNode(true))
+    shadow.appendChild(stylesheet)
+    shadow.appendChild(template.content.cloneNode(true))
     // Initialization
     this.style.display = 'block'
-    this.__element = this.querySelector('textarea')
+    this.__element = shadow.querySelector('textarea')
 
     const mode = this.hasAttribute('mode') ? this.getAttribute('mode') : 'null'
     const theme = this.hasAttribute('theme') ? this.getAttribute('theme') : 'default'
@@ -71,6 +75,8 @@ export class WCCodeMirror extends HTMLElement {
 
     if (readOnly === '') readOnly = true
     else if (readOnly !== 'nocursor') readOnly = false
+
+    this.refreshStyles()
 
     let content = ''
     const innerScriptTag = this.querySelector('script')
@@ -126,6 +132,21 @@ export class WCCodeMirror extends HTMLElement {
   async fetchSrc (src) {
     const response = await fetch(src)
     return response.text()
+  }
+
+  refreshStyles () {
+    // Remove all <link> element in shadow root
+    Array.from(this.shadowRoot.children).forEach(element => {
+      if (element.tagName === 'LINK' && element.getAttribute('rel') === 'stylesheet') {
+        element.remove()
+      }
+    })
+    // Find all <link> elements in <wc-codemirror>
+    Array.from(this.children).forEach(element => {
+      if (element.tagName === 'LINK' && element.getAttribute('rel') === 'stylesheet') {
+        this.shadowRoot.appendChild(element.cloneNode(true))
+      }
+    })
   }
 
   static template () {

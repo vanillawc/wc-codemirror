@@ -1,5 +1,4 @@
-document.body.insertAdjacentHTML('beforeend', `
-<style>
+export const CODE_MIRROR_CSS_CONTENT = `
 /* BASICS */
 
 .CodeMirror {
@@ -349,5 +348,4 @@ div.CodeMirror-dragcursors {
 
 /* Help users use markselection to safely style text background */
 span.CodeMirror-selectedtext { background: none; }
-</style>
-`)
+`
