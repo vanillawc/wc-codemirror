@@ -9707,14 +9707,14 @@ var WCCodeMirror = class extends HTMLElement {
   }
   constructor() {
     super();
-    const template = document.createElement("template");
-    template.innerHTML = WCCodeMirror.template();
-    this.appendChild(template.content.cloneNode(true));
     this.__initialized = false;
     this.__element = null;
     this.editor = null;
   }
   async connectedCallback() {
+    const template = document.createElement("template");
+    template.innerHTML = WCCodeMirror.template();
+    this.appendChild(template.content.cloneNode(true));
     this.style.display = "block";
     this.__element = this.querySelector("textarea");
     const mode = this.hasAttribute("mode") ? this.getAttribute("mode") : "null";
