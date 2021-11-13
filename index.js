@@ -9302,8 +9302,7 @@ CodeMirror.version = "5.61.0";
 var codemirror_default = CodeMirror;
 
 // src/styling.js
-document.body.insertAdjacentHTML("beforeend", `
-<style>
+var CODE_MIRROR_CSS_CONTENT = `
 /* BASICS */
 
 .CodeMirror {
@@ -9653,8 +9652,7 @@ div.CodeMirror-dragcursors {
 
 /* Help users use markselection to safely style text background */
 span.CodeMirror-selectedtext { background: none; }
-</style>
-`);
+`;
 
 // src/wc-codemirror.js
 self.CodeMirror = codemirror_default;
@@ -9707,16 +9705,20 @@ var WCCodeMirror = class extends HTMLElement {
   }
   constructor() {
     super();
-    const template = document.createElement("template");
-    template.innerHTML = WCCodeMirror.template();
-    this.appendChild(template.content.cloneNode(true));
     this.__initialized = false;
     this.__element = null;
     this.editor = null;
   }
   async connectedCallback() {
+    const shadow = this.attachShadow({mode: "open"});
+    const template = document.createElement("template");
+    const stylesheet = document.createElement("style");
+    stylesheet.innerHTML = CODE_MIRROR_CSS_CONTENT;
+    template.innerHTML = WCCodeMirror.template();
+    shadow.appendChild(stylesheet);
+    shadow.appendChild(template.content.cloneNode(true));
     this.style.display = "block";
-    this.__element = this.querySelector("textarea");
+    this.__element = shadow.querySelector("textarea");
     const mode = this.hasAttribute("mode") ? this.getAttribute("mode") : "null";
     const theme = this.hasAttribute("theme") ? this.getAttribute("theme") : "default";
     let readOnly = this.getAttribute("readonly");
@@ -9724,6 +9726,7 @@ var WCCodeMirror = class extends HTMLElement {
       readOnly = true;
     else if (readOnly !== "nocursor")
       readOnly = false;
+    this.refreshStyles();
     let content = "";
     const innerScriptTag = this.querySelector("script");
     if (innerScriptTag) {
@@ -9769,6 +9772,18 @@ var WCCodeMirror = class extends HTMLElement {
   async fetchSrc(src) {
     const response = await fetch(src);
     return response.text();
+  }
+  refreshStyles() {
+    Array.from(this.shadowRoot.children).forEach((element) => {
+      if (element.tagName === "LINK" && element.getAttribute("rel") === "stylesheet") {
+        element.remove();
+      }
+    });
+    Array.from(this.children).forEach((element) => {
+      if (element.tagName === "LINK" && element.getAttribute("rel") === "stylesheet") {
+        this.shadowRoot.appendChild(element.cloneNode(true));
+      }
+    });
   }
   static template() {
     return `
