@@ -46,28 +46,39 @@ export class WCCodeMirror extends HTMLElement {
 
   get value () { return this.editor.getValue() }
   set value (value) {
-    this.setValue(value)
+    if (this.__initialized) {
+      this.setValueForced(value)
+    } else {
+      // Save to pre init
+      this.__preInitValue = value
+    }
   }
 
   constructor () {
     super()
+
+    this.setupMutationObserver()
+    this.attachShadow({ mode: 'open' })
+
+    // Create template
+    const template = document.createElement('template')
+    const stylesheet = document.createElement('style')
+    stylesheet.innerHTML = CODE_MIRROR_CSS_CONTENT
+    template.innerHTML = WCCodeMirror.template()
+    this.shadowRoot.appendChild(stylesheet)
+    this.shadowRoot.appendChild(template.content.cloneNode(true))
+
+    this.__textMarks = []
+    this.__gutters = []
     this.__initialized = false
     this.__element = null
     this.editor = null
   }
 
   async connectedCallback () {
-    // Create template
-    const shadow = this.attachShadow({ mode: 'open' })
-    const template = document.createElement('template')
-    const stylesheet = document.createElement("style")
-    stylesheet.innerHTML = CODE_MIRROR_CSS_CONTENT
-    template.innerHTML = WCCodeMirror.template()
-    shadow.appendChild(stylesheet)
-    shadow.appendChild(template.content.cloneNode(true))
     // Initialization
     this.style.display = 'block'
-    this.__element = shadow.querySelector('textarea')
+    this.__element = this.shadowRoot.querySelector('textarea')
 
     const mode = this.hasAttribute('mode') ? this.getAttribute('mode') : 'null'
     const theme = this.hasAttribute('theme') ? this.getAttribute('theme') : 'default'
@@ -75,17 +86,6 @@ export class WCCodeMirror extends HTMLElement {
 
     if (readOnly === '') readOnly = true
     else if (readOnly !== 'nocursor') readOnly = false
-
-    this.refreshStyles()
-
-    let content = ''
-    const innerScriptTag = this.querySelector('script')
-    if (innerScriptTag) {
-      if (innerScriptTag.getAttribute('type') === 'wc-content') {
-        content = WCCodeMirror.dedentText(innerScriptTag.innerHTML)
-        content = content.replace(/&lt;(\/?script)(.*?)&gt;/g, '<$1$2>')
-      }
-    }
 
     let viewportMargin = CodeMirror.defaults.viewportMargin
     if (this.hasAttribute('viewport-margin')) {
@@ -101,21 +101,32 @@ export class WCCodeMirror extends HTMLElement {
       viewportMargin
     })
 
+    this.refreshStyleLinks()
+    this.refrestWcContent()
+    this.setupEvents()
+
     if (this.hasAttribute('src')) {
-      this.setSrc(this.getAttribute('src'))
-    } else {
-      // delay until editor initializes
-      await new Promise(resolve => setTimeout(resolve, 50))
-      this.value = content
+      this.setSrc()
     }
 
+    // delay until editor initializes
+    await new Promise(resolve => setTimeout(resolve, 50))
     this.__initialized = true
+
+    if (this.__preInitValue !== undefined) {
+      this.setValueForced(this.__preInitValue)
+    }
+
+    // This should be invoked after text set
+    this.refreshMarkText()
+    this.refreshGutters()
   }
 
   disconnectedCallback () {
     this.editor && this.editor.toTextArea()
     this.editor = null
     this.__initialized = false
+    this.__observer.disconnect()
   }
 
   async setSrc () {
@@ -124,7 +135,10 @@ export class WCCodeMirror extends HTMLElement {
     this.value = contents
   }
 
-  async setValue (value) {
+  /**
+   * Set value without initialization check
+   */
+  async setValueForced (value) {
     this.editor.swapDoc(CodeMirror.Doc(value, this.getAttribute('mode')))
     this.editor.refresh()
   }
@@ -134,7 +148,7 @@ export class WCCodeMirror extends HTMLElement {
     return response.text()
   }
 
-  refreshStyles () {
+  refreshStyleLinks () {
     // Remove all <link> element in shadow root
     Array.from(this.shadowRoot.children).forEach(element => {
       if (element.tagName === 'LINK' && element.getAttribute('rel') === 'stylesheet') {
@@ -147,6 +161,190 @@ export class WCCodeMirror extends HTMLElement {
         this.shadowRoot.appendChild(element.cloneNode(true))
       }
     })
+  }
+
+  refrestWcContent () {
+    const innerScriptTag = this.querySelector('script')
+    if (innerScriptTag) {
+      if (innerScriptTag.getAttribute('type') === 'wc-content') {
+        const data = WCCodeMirror.dedentText(innerScriptTag.innerHTML)
+        this.value = data.replace(/&lt;(\/?script)(.*?)&gt;/g, '<$1$2>')
+      }
+    }
+  }
+
+  refreshMarkText () {
+    // Remove all old marks
+    this.__textMarks.forEach(element => {
+      element.clear()
+    })
+    this.__textMarks = Array.from(this.children)
+      .filter(element => element.tagName === 'MARK-TEXT')
+      .map(element => {
+        try {
+          const fromLine = parseInt(element.getAttribute('from-line'))
+          const fromChar = parseInt(element.getAttribute('from-char'))
+          const toLine = parseInt(element.getAttribute('to-line'))
+          const toChar = parseInt(element.getAttribute('to-char'))
+          const options = JSON.parse(element.getAttribute('options').replace(/'/g, '"'))
+          const from = { line: fromLine, ch: fromChar }
+          const to = { line: toLine, ch: toChar }
+          return this.editor.markText(from, to, options)
+        } catch (error) {
+          console.error(error)
+          // Return ermpty descriptor
+          return { clear: () => {} }
+        }
+      })
+  }
+
+  refreshGutters () {
+    // Remove all gutters
+    this.__gutters.forEach(gutter => this.editor.clearGutter(gutter.name))
+    this.__gutters = Array.from(this.children)
+      .filter((g) => g.tagName === 'GUTTERS' && g.hasAttribute('name'))
+      .map((g) => {
+        return {
+          name: g.getAttribute('name'),
+          lines: Array.from(g.children)
+            .filter(e => e.tagName === 'GUTTER' && e.children.length > 0)
+            .map((e) => {
+              const line = parseInt(e.getAttribute('line'))
+              const firstChild = e.children[0]
+              return { line, marker: firstChild }
+            })
+        }
+      })
+    this.editor.setOption('gutters', this.__gutters.map((g) => g.name))
+    // Setup markers
+    this.__gutters.forEach((g) => {
+      g.lines.forEach((e) => {
+        this.editor.setGutterMarker(e.line, g.name, e.marker.cloneNode(true))
+      })
+    })
+  }
+
+  setupMutationObserver () {
+    const observerConfig = {
+      childList: true,
+      characterData: true,
+      subtree: true,
+      attributes: true
+    }
+
+    const nodeListContainsTag = (nodeList, tag) => {
+      const checkThatTag = (e) => e.tagName === tag
+      const removed = Array.from(nodeList)
+      return removed.some(checkThatTag)
+    }
+
+    const mutContainsRemovedTag = (tag) => (record) => {
+      return nodeListContainsTag(record.removedNodes, tag)
+    }
+
+    const mutContainsAddedTag = (tag) => (record) => {
+      return nodeListContainsTag(record.addedNodes, tag)
+    }
+
+    const mutTargetHierarchyContainsTag = (tag) => (record) => {
+      let tagetMatched = false
+      for (let t = record.target; t !== null && t !== this; t = t.parentNode) {
+        if (t.tagName === tag) {
+          tagetMatched = true
+          break
+        }
+      }
+      return tagetMatched
+    }
+
+    const mutContainsTag = (tag) => {
+      const containsAdded = mutContainsAddedTag(tag)
+      const containsRemoved = mutContainsRemovedTag(tag)
+      const matchTarget = mutTargetHierarchyContainsTag(tag)
+
+      return (record) => matchTarget(record) || containsAdded(record) || containsRemoved(record)
+    }
+
+    const mutContainsLink = mutContainsTag('LINK')
+    const mutContainsMarkText = mutContainsTag('MARK-TEXT')
+    const mutContainsGutters = mutContainsTag('GUTTERS')
+    const mutContainsGutter = mutContainsTag('GUTTER')
+    const mutContainsRemovedScript = mutContainsRemovedTag('SCRIPT')
+    const mutContainsAddedScript = mutContainsAddedTag('SCRIPT')
+    const mutTargetHierarchyContainsScript = mutTargetHierarchyContainsTag('SCRIPT')
+
+    this.__observer = new MutationObserver((mutationsList, observer) => {
+      let doRefreshMarks = false
+      let doRefreshGutters = false
+
+      mutationsList.forEach((record) => {
+        if (mutContainsLink(record)) {
+          this.refreshStyleLinks()
+        }
+        if (mutContainsRemovedScript(record)) {
+          this.value = ''
+          doRefreshMarks = true
+          doRefreshGutters = true
+        }
+        if (mutContainsAddedScript(record) || mutTargetHierarchyContainsScript(record)) {
+          this.refrestWcContent()
+          doRefreshMarks = true
+          doRefreshGutters = true
+        }
+        if (mutContainsGutters(record) || mutContainsGutter(record)) {
+          doRefreshGutters = true
+        }
+        if (mutContainsMarkText(record)) {
+          doRefreshMarks = true
+        }
+      })
+
+      // Perform refresh
+      if (doRefreshMarks) {
+        this.refreshMarkText()
+      }
+      if (doRefreshGutters) {
+        this.refreshGutters()
+      }
+    })
+
+    this.__observer.observe(this, observerConfig)
+  }
+
+  setupEvent (type, ...argNames) {
+    CodeMirror.on(this.editor, type, (...args) => {
+      const detail = {}
+      args.shift() // Remove instance
+      args.forEach((arg, i) => {
+        detail[argNames[i]] = arg
+      })
+      const initDict = { bubbles: true, detail }
+      const event = new CustomEvent(type, initDict)
+      this.dispatchEvent(event)
+    })
+  }
+
+  setupEvents () {
+    this.setupEvent('change', 'changeObj')
+    this.setupEvent('changes', 'changes')
+    this.setupEvent('beforeChange', 'changeObj')
+    this.setupEvent('cursorActivity')
+    this.setupEvent('keyHandled', 'name', 'event')
+    this.setupEvent('inputRead', 'changeObj')
+    this.setupEvent('electricInput', 'line')
+    this.setupEvent('beforeSelectionChange', 'obj')
+    this.setupEvent('viewportChange', 'from', 'to')
+    this.setupEvent('swapDoc', 'oldDoc')
+    this.setupEvent('gutterClick', 'line', 'gutter', 'event')
+    this.setupEvent('gutterContextMenu', 'line', 'gutter', 'event')
+    this.setupEvent('focus', 'event')
+    this.setupEvent('blur', 'event')
+    this.setupEvent('scroll')
+    this.setupEvent('refresh')
+    this.setupEvent('optionChange', 'option')
+    this.setupEvent('scrollCursorIntoView', 'event')
+    this.setupEvent('update')
+    this.setupEvent('renderLine', 'line', 'element')
   }
 
   static template () {
