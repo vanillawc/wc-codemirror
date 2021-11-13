@@ -46,11 +46,78 @@ export class WCCodeMirror extends HTMLElement {
 
   get value () { return this.editor.getValue() }
   set value (value) {
-    this.setValue(value)
+    if (this.__initialized) {
+      this.setValueForced(value)
+    } else {
+      // Save to pre init
+      this.__preInitValue = value
+    }
   }
 
   constructor () {
     super()
+
+    const observerConfig = {
+      childList: true,
+      characterData: true,
+      subtree: true
+    }
+
+    const nodeListContainsTag = (nodeList, tag) => {
+      const checkThatTag = (e) => e.tagName === tag
+      const removed = Array.from(nodeList)
+      return removed.some(checkThatTag)
+    }
+
+    const mutContainsRemovedTag = (tag) => (record) => {
+      return nodeListContainsTag(record.removedNodes, tag)
+    }
+
+    const mutContainsAddedTag = (tag) => (record) => {
+      return nodeListContainsTag(record.addedNodes, tag)
+    }
+
+    const mutContainsTag = (tag) => {
+      const containsAdded = mutContainsAddedTag(tag)
+      const containsRemoved = mutContainsRemovedTag(tag)
+      return (record) => containsAdded(record) || containsRemoved(record)
+    }
+
+    const mutContainsLink = mutContainsTag('LINK')
+    const mutContainsMarkText = mutContainsTag('MARK-TEXT')
+    const mutContainsRemovedScript = mutContainsRemovedTag('SCRIPT')
+    const mutContainsAddedScript = mutContainsAddedTag('SCRIPT')
+
+    this.__observer = new MutationObserver((mutationsList, observer) => {
+      let doRefreshMarks = false
+      mutationsList.forEach((record) => {
+        if (record.type === 'childList') {
+          if (mutContainsLink(record)) {
+            this.refreshStyleLinks()
+          }
+          if (mutContainsRemovedScript(record)) {
+            this.value = ''
+          }
+          if (mutContainsAddedScript(record)) {
+            this.refrestWcContent()
+          }
+          if (mutContainsMarkText(record)) {
+            doRefreshMarks = true
+          }
+        } else if (record.type === 'characterData') {
+          // Text data had been chaged. It's a reason to
+          // check wc-content
+          this.refrestWcContent()
+        }
+      })
+      if (doRefreshMarks) {
+        this.refreshMarkText()
+      }
+    })
+
+    this.__observer.observe(this, observerConfig)
+
+    this.__textMarks = []
     this.__initialized = false
     this.__element = null
     this.editor = null
@@ -60,7 +127,7 @@ export class WCCodeMirror extends HTMLElement {
     // Create template
     const shadow = this.attachShadow({ mode: 'open' })
     const template = document.createElement('template')
-    const stylesheet = document.createElement("style")
+    const stylesheet = document.createElement('style')
     stylesheet.innerHTML = CODE_MIRROR_CSS_CONTENT
     template.innerHTML = WCCodeMirror.template()
     shadow.appendChild(stylesheet)
@@ -76,17 +143,6 @@ export class WCCodeMirror extends HTMLElement {
     if (readOnly === '') readOnly = true
     else if (readOnly !== 'nocursor') readOnly = false
 
-    this.refreshStyles()
-
-    let content = ''
-    const innerScriptTag = this.querySelector('script')
-    if (innerScriptTag) {
-      if (innerScriptTag.getAttribute('type') === 'wc-content') {
-        content = WCCodeMirror.dedentText(innerScriptTag.innerHTML)
-        content = content.replace(/&lt;(\/?script)(.*?)&gt;/g, '<$1$2>')
-      }
-    }
-
     let viewportMargin = CodeMirror.defaults.viewportMargin
     if (this.hasAttribute('viewport-margin')) {
       const viewportMarginAttr = this.getAttribute('viewport-margin').toLowerCase()
@@ -101,21 +157,30 @@ export class WCCodeMirror extends HTMLElement {
       viewportMargin
     })
 
+    this.refreshStyleLinks()
+    this.refrestWcContent()
+
     if (this.hasAttribute('src')) {
-      this.setSrc(this.getAttribute('src'))
-    } else {
-      // delay until editor initializes
-      await new Promise(resolve => setTimeout(resolve, 50))
-      this.value = content
+      this.setSrc()
     }
 
+    // delay until editor initializes
+    await new Promise(resolve => setTimeout(resolve, 50))
     this.__initialized = true
+
+    if (this.__preInitValue !== undefined) {
+      this.setValueForced(this.__preInitValue)
+    }
+
+    // This should be invoked after text set
+    this.refreshMarkText()
   }
 
   disconnectedCallback () {
     this.editor && this.editor.toTextArea()
     this.editor = null
     this.__initialized = false
+    this.__observer.disconnect()
   }
 
   async setSrc () {
@@ -124,7 +189,10 @@ export class WCCodeMirror extends HTMLElement {
     this.value = contents
   }
 
-  async setValue (value) {
+  /**
+   * Set value without initialization check
+   */
+  async setValueForced (value) {
     this.editor.swapDoc(CodeMirror.Doc(value, this.getAttribute('mode')))
     this.editor.refresh()
   }
@@ -134,7 +202,7 @@ export class WCCodeMirror extends HTMLElement {
     return response.text()
   }
 
-  refreshStyles () {
+  refreshStyleLinks () {
     // Remove all <link> element in shadow root
     Array.from(this.shadowRoot.children).forEach(element => {
       if (element.tagName === 'LINK' && element.getAttribute('rel') === 'stylesheet') {
@@ -147,6 +215,41 @@ export class WCCodeMirror extends HTMLElement {
         this.shadowRoot.appendChild(element.cloneNode(true))
       }
     })
+  }
+
+  refrestWcContent () {
+    const innerScriptTag = this.querySelector('script')
+    if (innerScriptTag) {
+      if (innerScriptTag.getAttribute('type') === 'wc-content') {
+        const data = WCCodeMirror.dedentText(innerScriptTag.innerHTML)
+        this.value = data.replace(/&lt;(\/?script)(.*?)&gt;/g, '<$1$2>')
+      }
+    }
+  }
+
+  refreshMarkText () {
+    // Remove all old marks
+    this.__textMarks.forEach(element => {
+      element.clear()
+    })
+    this.__textMarks = Array.from(this.children)
+      .filter(element => element.tagName === 'MARK-TEXT')
+      .map(element => {
+        try {
+          const fromLine = parseInt(element.getAttribute('from-line'))
+          const fromChar = parseInt(element.getAttribute('from-char'))
+          const toLine = parseInt(element.getAttribute('to-line'))
+          const toChar = parseInt(element.getAttribute('to-char'))
+          const options = JSON.parse(element.getAttribute('options').replace(/'/g, '"'))
+          const from = { line: fromLine, ch: fromChar }
+          const to = { line: toLine, ch: toChar }
+          return this.editor.markText(from, to, options)
+        } catch (error) {
+          console.error(error)
+          // Return ermpty descriptor
+          return { clear: () => {} }
+        }
+      })
   }
 
   static template () {

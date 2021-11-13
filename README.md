@@ -96,6 +96,19 @@ Then specify the language with the `mode` attribute
 <wc-codemirror mode="javascript"></wc-codemirror>
 ```
 
+### Text-marking
+
+Can be used to mark a range of text with a specific CSS class name.
+
+```html
+<wc-codemirror>
+  <script type="wc-content">
+    Hello world
+  </script>
+  <mark-text from-line="1" from-char="7" to-line="1" to-char="11" options="{ 'css': 'color: red', 'title': 'cow' }" />
+</wc-codemirror> 
+```
+
 ### Theming
 
 Theming requires importing an editor theme stylesheet within `wc-codemirror` tag. You can import few themes this way and switch them with the `theme` attribute.
