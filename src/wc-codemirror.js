@@ -64,14 +64,14 @@ export class WCCodeMirror extends HTMLElement {
     }
 
     const linkChanged = (e) => {
-      return e.type === "childList" && 
-        (Array.from(e.addedNodes).some((e) => e.tagName === "LINK") ||
-         Array.from(e.removedNodes).some((e) => e.tagName === "LINK"))
+      return e.type === 'childList' &&
+        (Array.from(e.addedNodes).some((e) => e.tagName === 'LINK') ||
+         Array.from(e.removedNodes).some((e) => e.tagName === 'LINK'))
     }
 
     this.__observer = new MutationObserver((mutationsList, observer) => {
       if (mutationsList.some(linkChanged)) {
-        this.refreshStyles();
+        this.refreshStyles()
       }
       this.lookupInnerScript((data) => {
         this.value = data
