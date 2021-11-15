@@ -9701,10 +9701,31 @@ var WCCodeMirror = class extends HTMLElement {
     return this.editor.getValue();
   }
   set value(value) {
-    this.setValue(value);
+    if (this.__initialized) {
+      this.setValueForced(value);
+    } else {
+      this.__preInitValue = value;
+    }
   }
   constructor() {
     super();
+    const observerConfig = {
+      childList: true,
+      characterData: true,
+      subtree: true
+    };
+    const linkChanged = (e) => {
+      return e.type === "childList" && (Array.from(e.addedNodes).some((e2) => e2.tagName === "LINK") || Array.from(e.removedNodes).some((e2) => e2.tagName === "LINK"));
+    };
+    this.__observer = new MutationObserver((mutationsList, observer) => {
+      if (mutationsList.some(linkChanged)) {
+        this.refreshStyles();
+      }
+      this.lookupInnerScript((data) => {
+        this.value = data;
+      });
+    });
+    this.__observer.observe(this, observerConfig);
     this.__initialized = false;
     this.__element = null;
     this.editor = null;
@@ -9727,14 +9748,9 @@ var WCCodeMirror = class extends HTMLElement {
     else if (readOnly !== "nocursor")
       readOnly = false;
     this.refreshStyles();
-    let content = "";
-    const innerScriptTag = this.querySelector("script");
-    if (innerScriptTag) {
-      if (innerScriptTag.getAttribute("type") === "wc-content") {
-        content = WCCodeMirror.dedentText(innerScriptTag.innerHTML);
-        content = content.replace(/&lt;(\/?script)(.*?)&gt;/g, "<$1$2>");
-      }
-    }
+    this.lookupInnerScript((data) => {
+      this.value = data;
+    });
     let viewportMargin = codemirror_default.defaults.viewportMargin;
     if (this.hasAttribute("viewport-margin")) {
       const viewportMarginAttr = this.getAttribute("viewport-margin").toLowerCase();
@@ -9748,24 +9764,26 @@ var WCCodeMirror = class extends HTMLElement {
       viewportMargin
     });
     if (this.hasAttribute("src")) {
-      this.setSrc(this.getAttribute("src"));
-    } else {
-      await new Promise((resolve) => setTimeout(resolve, 50));
-      this.value = content;
+      this.setSrc();
     }
+    await new Promise((resolve) => setTimeout(resolve, 50));
     this.__initialized = true;
+    if (this.__preInitValue !== void 0) {
+      this.setValueForced(this.__preInitValue);
+    }
   }
   disconnectedCallback() {
     this.editor && this.editor.toTextArea();
     this.editor = null;
     this.__initialized = false;
+    this.__observer.disconnect();
   }
   async setSrc() {
     const src = this.getAttribute("src");
     const contents = await this.fetchSrc(src);
     this.value = contents;
   }
-  async setValue(value) {
+  async setValueForced(value) {
     this.editor.swapDoc(codemirror_default.Doc(value, this.getAttribute("mode")));
     this.editor.refresh();
   }
@@ -9789,6 +9807,16 @@ var WCCodeMirror = class extends HTMLElement {
     return `
       <textarea style="display:inherit; width:inherit; height:inherit;"></textarea>
     `;
+  }
+  lookupInnerScript(callback) {
+    const innerScriptTag = this.querySelector("script");
+    if (innerScriptTag) {
+      if (innerScriptTag.getAttribute("type") === "wc-content") {
+        let data = WCCodeMirror.dedentText(innerScriptTag.innerHTML);
+        data = data.replace(/&lt;(\/?script)(.*?)&gt;/g, "<$1$2>");
+        callback(data);
+      }
+    }
   }
   static dedentText(text) {
     const lines = text.split("\n");
