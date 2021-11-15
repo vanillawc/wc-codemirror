@@ -72,7 +72,7 @@ Inline source can be loaded by including a `<script>` of type `wc-content` in th
 </wc-codemirror>
 ```
 
-*Note: The `</script>` word cannot be used inside here, you'll have to use the escaped `&lt;/script&gt;` version instead, you may also use `&lt;script&gt;` for the opening `<script>` tag if you wish to*
+*Note: `</script>` cannot be used inside of `<script type="wc-content">` until it's the angle brackets are escaped (ie `&lt;` and `&gt;`)*
 
 ### External Source
 
